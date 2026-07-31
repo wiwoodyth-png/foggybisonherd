@@ -415,12 +415,34 @@ const FB_URL = 'https://foggy-bison-herd-default-rtdb.firebaseio.com'.replace(/\
 const DATA_NODE = '/foggybisonherd-data';
 let pendingRemoteData = null;
 
+const LS_KEY = 'fbh-my-id';
 function idFromHash(){
   const m = location.hash.match(/id=([A-Za-z0-9_]+)/);
   return m ? m[1] : null;
 }
-function setHashId(id){
-  history.replaceState(null, '', '#id=' + id);
+// identity lives in this browser's localStorage — private to this device,
+// so it can never ride along in a link someone shares with the group.
+function getStoredId(){
+  try{
+    const fromLS = localStorage.getItem(LS_KEY);
+    if(fromLS) return fromLS;
+  }catch(e){ /* localStorage unavailable (e.g. private browsing) */ }
+  // one-time migration: earlier versions stored identity in the URL hash.
+  // adopt it once, then scrub it out of the address bar so it stops
+  // being copyable/shareable from here on.
+  const fromHash = idFromHash();
+  if(fromHash){
+    setStoredId(fromHash);
+    history.replaceState(null, '', location.pathname + location.search);
+    return fromHash;
+  }
+  return null;
+}
+function setStoredId(id){
+  try{ localStorage.setItem(LS_KEY, id); }catch(e){ /* ignore */ }
+}
+function clearStoredId(){
+  try{ localStorage.removeItem(LS_KEY); }catch(e){ /* ignore */ }
 }
 
 async function fetchInitial(){
@@ -538,7 +560,7 @@ function deletePerson(id){
   delete picks[id];
   if(myId===id){
     myId = null;
-    history.replaceState(null, '', location.pathname + location.search);
+    clearStoredId();
   }
   render();
   saveData();
@@ -582,7 +604,7 @@ async function submitAddPerson(){
   myId = id;
   addFormOpen = false;
   pendingRemoteData = null;
-  setHashId(id);
+  setStoredId(id);
   render();       // instant feedback
   saveData();      // background
 }
@@ -782,7 +804,7 @@ function escapeHtml(s){
 
 async function init(){
   await fetchInitial();
-  myId = idFromHash();
+  myId = getStoredId();
   if(myId && !people.some(p=>p.id===myId)) myId = null; // stale/unknown id, start fresh
   render();
   connectStream();
