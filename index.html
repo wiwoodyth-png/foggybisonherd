@@ -669,7 +669,7 @@ function render(){
     </div>`;
   if(addFormOpen){
     html += `<div class="add-form">
-      <input type="text" id="new-person-name" placeholder="Your full name (e.g. Alex Rivera)" value="${escapeHtml(draftName)}" oninput="draftName=this.value;" onkeydown="if(event.key==='Enter')submitAddPerson();" />
+      <input type="text" id="new-person-name" placeholder="Your full name (e.g. Ranger Dave)" value="${escapeHtml(draftName)}" oninput="draftName=this.value;" onkeydown="if(event.key==='Enter')submitAddPerson();" />
       <div class="swatch-grid">`;
     PALETTE.forEach(c=>{
       html += `<div class="swatch ${c===pendingColor?'selected':''}" style="background:${c}" onclick="pickColor('${c}');"></div>`;
