@@ -64,6 +64,7 @@
   .person-chip{
     display:flex;align-items:center;gap:6px;background:#fff;border:2px solid var(--ink);
     border-radius:999px;padding:5px 11px 5px 5px;cursor:pointer;font-weight:600;font-size:13px;
+    -webkit-touch-callout:none;user-select:none;
   }
   .person-chip.me{box-shadow:0 0 0 2px #FF3D7F;}
   .dot{
@@ -514,7 +515,34 @@ function wantersFor(actId){
   return people.filter(p => (picks[p.id]||[]).includes(actId));
 }
 
-function switchIdentity(id){ myId = id; addFormOpen = false; setHashId(id); render(); }
+let colorPickerFor = null;
+function toggleColorPicker(id){
+  colorPickerFor = (colorPickerFor === id) ? null : id;
+  render();
+}
+async function setPersonColor(id, color){
+  const p = people.find(x=>x.id===id);
+  if(!p) return;
+  p.color = color;
+  colorPickerFor = null;
+  render();
+  saveData();
+}
+
+function deletePerson(id){
+  const p = people.find(x=>x.id===id);
+  if(!p) return;
+  const ok = confirm(`Remove ${p.name} and all their picks? This can't be undone.`);
+  if(!ok) return;
+  people = people.filter(x=>x.id!==id);
+  delete picks[id];
+  if(myId===id){
+    myId = null;
+    history.replaceState(null, '', location.pathname + location.search);
+  }
+  render();
+  saveData();
+}
 
 function toggleAddForm(){
   addFormOpen = !addFormOpen;
@@ -585,10 +613,10 @@ function dayBounds(day){
 /* ---------- long-press handling ---------- */
 let pressTimer = null;
 let pressFired = false;
-function bindPress(el, actId){
+function bindPress(el, onTap, onHold){
   const start = (e)=>{
     pressFired = false;
-    pressTimer = setTimeout(()=>{ pressFired = true; openWhoModal(actId); }, 480);
+    pressTimer = setTimeout(()=>{ pressFired = true; onHold(); }, 480);
   };
   const clear = ()=>{ if(pressTimer) clearTimeout(pressTimer); };
   el.addEventListener('pointerdown', start);
@@ -597,9 +625,9 @@ function bindPress(el, actId){
   el.addEventListener('pointercancel', clear);
   el.addEventListener('click', (e)=>{
     if(pressFired){ e.preventDefault(); pressFired=false; return; }
-    toggleWant(actId);
+    onTap();
   });
-  el.addEventListener('contextmenu', (e)=>{ e.preventDefault(); openWhoModal(actId); });
+  el.addEventListener('contextmenu', (e)=>{ e.preventDefault(); onHold(); });
 }
 
 /* ---------- render ---------- */
@@ -632,7 +660,7 @@ function render(){
     <div class="chip-row">`;
   people.forEach(p=>{
     const txt = contrastText(p.color);
-    html += `<div class="person-chip ${p.id===myId?'me':''}" onclick="switchIdentity('${p.id}')">
+    html += `<div class="person-chip ${p.id===myId?'me':''}" id="chip-${p.id}">
       <span class="dot" style="background:${p.color};color:${txt}">${initialsOf(p.name)}</span>
       <span>${escapeHtml(p.name)}</span>
     </div>`;
@@ -653,6 +681,21 @@ function render(){
       </div>
     </div>`;
   }
+  if(colorPickerFor){
+    const cp = people.find(x=>x.id===colorPickerFor);
+    if(cp){
+      html += `<div class="add-form">
+        <div style="font-weight:700;font-size:13px;margin-bottom:8px;">Change color for ${escapeHtml(cp.name)}</div>
+        <div class="swatch-grid">`;
+      PALETTE.forEach(c=>{
+        html += `<div class="swatch ${c===cp.color?'selected':''}" style="background:${c}" onclick="setPersonColor('${cp.id}','${c}')"></div>`;
+      });
+      html += `</div>
+        <button class="cancel-mini" onclick="colorPickerFor=null;render();">Close</button>
+      </div>`;
+    }
+  }
+  html += `<div style="font-family:'Space Mono',monospace;font-size:10.5px;color:#075C57;margin-top:8px;opacity:0.8;">Tap a name to change their color • Press &amp; hold to remove</div>`;
   html += `</div>`;
 
   // filter bar
@@ -683,7 +726,7 @@ function render(){
       <div class="stage-body" style="height:${totalHeight}px;">`;
     acts.forEach(act=>{
       const top = (act.s-min)*PX_PER_MIN;
-      const h = Math.max((act.e-act.s)*PX_PER_MIN, 30);
+      const h = Math.max((act.e-act.s)*PX_PER_MIN, 64);
       const wanters = wantersFor(act.id);
       const iAmIn = myId && wanters.some(w=>w.id===myId);
       const converge = wanters.length>=3;
@@ -724,8 +767,12 @@ function render(){
   STAGES[currentDay].forEach(([sid])=>{
     ACTS[currentDay].filter(a=>a.stage===sid).forEach(act=>{
       const el = document.getElementById('act-'+act.id);
-      if(el) bindPress(el, act.id);
+      if(el) bindPress(el, ()=>toggleWant(act.id), ()=>openWhoModal(act.id));
     });
+  });
+  people.forEach(p=>{
+    const el = document.getElementById('chip-'+p.id);
+    if(el) bindPress(el, ()=>toggleColorPicker(p.id), ()=>deletePerson(p.id));
   });
 }
 
