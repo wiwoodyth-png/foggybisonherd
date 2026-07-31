@@ -1,0 +1,746 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+<title>FoggyBisonHerd</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Space+Mono:wght@400;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#12181A;
+    --cream:#F7F2E2;
+    --line: rgba(18,24,26,0.18);
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color: transparent;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:'Inter', sans-serif;
+    color:var(--ink);
+    min-height:100vh;
+    background:#0B8C84;
+    transition:background 0.25s ease;
+  }
+  body.day-Friday{ background:#0B8C84; }
+  body.day-Saturday{ background:#F26B3A; }
+  body.day-Sunday{ background:#4C9A2A; }
+
+  .wrap{max-width:1180px;margin:0 auto;padding:16px 14px 60px;}
+
+  .header{
+    display:flex;justify-content:space-between;align-items:flex-end;gap:12px;
+    flex-wrap:wrap;margin-bottom:12px;
+  }
+  .title-block h1{
+    font-family:'Anton', sans-serif;font-weight:400;letter-spacing:0.5px;
+    font-size:clamp(24px, 5.4vw, 38px);color:#FFD23E;
+    text-shadow: 3px 3px 0 var(--ink);
+    margin:0;line-height:0.95;
+  }
+  .title-block .sub{
+    font-family:'Space Mono', monospace;color:var(--cream);
+    font-size:12px;margin-top:6px;opacity:0.92;letter-spacing:0.4px;
+  }
+
+  /* day tabs */
+  .day-tabs{display:flex;gap:8px;margin-bottom:12px;}
+  .day-tab{
+    flex:1;text-align:center;font-family:'Anton';font-weight:400;font-size:15px;
+    padding:10px 6px;border:3px solid var(--ink);border-radius:12px;cursor:pointer;
+    background:rgba(255,255,255,0.35);color:var(--ink);letter-spacing:0.3px;
+  }
+  .day-tab.active{background:#FFD23E;box-shadow:3px 3px 0 var(--ink);}
+
+  .panel{
+    background:var(--cream);border:3px solid var(--ink);border-radius:16px;
+    box-shadow:5px 5px 0 rgba(0,0,0,0.25);padding:13px 14px;margin-bottom:12px;
+  }
+  .panel-label{
+    font-family:'Space Mono', monospace;font-size:11px;text-transform:uppercase;
+    letter-spacing:1px;color:#075C57;font-weight:700;margin-bottom:8px;
+  }
+
+  .chip-row{display:flex;flex-wrap:wrap;gap:7px;align-items:center;}
+  .person-chip{
+    display:flex;align-items:center;gap:6px;background:#fff;border:2px solid var(--ink);
+    border-radius:999px;padding:5px 11px 5px 5px;cursor:pointer;font-weight:600;font-size:13px;
+  }
+  .person-chip.me{box-shadow:0 0 0 2px #FF3D7F;}
+  .dot{
+    width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+    font-size:9.5px;font-weight:800;border:2px solid var(--ink);flex-shrink:0;
+  }
+  .add-person-btn{
+    display:flex;align-items:center;gap:6px;background:#FF3D7F;color:#fff;border:2px solid var(--ink);
+    border-radius:999px;padding:7px 14px;font-weight:700;font-size:13px;cursor:pointer;
+  }
+  .add-form{margin-top:11px;padding-top:11px;border-top:1px dashed var(--line);}
+  .add-form input[type=text]{
+    padding:9px 11px;border:2px solid var(--ink);border-radius:8px;font-family:'Inter';
+    font-size:15px;width:100%;max-width:280px;margin-bottom:9px;
+  }
+  .swatch-grid{display:flex;flex-wrap:wrap;gap:6px;max-width:340px;margin-bottom:10px;}
+  .swatch{width:26px;height:26px;border-radius:50%;border:2px solid transparent;cursor:pointer;}
+  .swatch.selected{border-color:var(--ink);box-shadow:0 0 0 2px #FFD23E;}
+  .form-actions{display:flex;gap:8px;}
+  .save-mini{
+    background:var(--ink);color:#fff;border:none;border-radius:8px;padding:9px 16px;
+    font-weight:700;cursor:pointer;font-size:13px;
+  }
+  .cancel-mini{
+    background:transparent;color:var(--ink);border:2px solid var(--ink);border-radius:8px;
+    padding:8px 15px;font-weight:700;cursor:pointer;font-size:13px;
+  }
+
+  .filter-row{display:flex;gap:8px;flex-wrap:wrap;}
+  .filter-chip{
+    font-family:'Space Mono', monospace;font-size:11.5px;border:2px solid var(--ink);
+    background:#fff;padding:6px 12px;border-radius:999px;cursor:pointer;font-weight:700;
+  }
+  .filter-chip.on{background:#075C57;color:#fff;}
+
+  .grid-outer{
+    background:#075C57;border:3px solid var(--ink);border-radius:16px;
+    box-shadow:5px 5px 0 rgba(0,0,0,0.25);overflow-x:auto;overflow-y:hidden;
+  }
+  body.day-Saturday .grid-outer{background:#B3401F;}
+  body.day-Sunday .grid-outer{background:#2E6A17;}
+
+  .grid-inner{display:flex;min-width:max-content;}
+  .time-col{width:52px;flex-shrink:0;position:relative;border-right:2px solid rgba(255,255,255,0.15);padding-top:50px;}
+  .time-label{
+    position:absolute;left:0;right:0;font-family:'Space Mono', monospace;font-size:10px;
+    color:var(--cream);opacity:0.75;padding-left:5px;transform:translateY(-6px);
+  }
+  .stage-col{width:200px;flex-shrink:0;border-right:1px solid rgba(255,255,255,0.12);position:relative;}
+  .stage-head{
+    height:50px;background:var(--ink);color:#FFD23E;font-family:'Anton';font-weight:400;
+    font-size:13px;letter-spacing:0.3px;display:flex;align-items:center;justify-content:center;
+    text-align:center;padding:4px 6px;position:sticky;top:0;z-index:5;line-height:1.05;
+  }
+  .stage-body{position:relative;}
+
+  .act{
+    position:absolute;left:4px;right:4px;background:#FFD23E;border:2px solid var(--ink);
+    border-radius:8px;padding:5px 7px 6px;cursor:pointer;overflow:hidden;
+    transition:filter 0.1s ease, opacity 0.15s ease, box-shadow 0.15s ease;
+    -webkit-touch-callout:none;user-select:none;
+  }
+  .act:hover{filter:brightness(1.06);}
+  .act.dimmed{opacity:0.25;}
+  .act.mine{background:#FFE38A;box-shadow:0 0 0 3px #FF3D7F;}
+  .act.converge{box-shadow:0 0 0 3px #fff, 0 0 14px 2px rgba(255,255,255,0.85);}
+  .act-name{
+    font-weight:800;font-size:11.5px;line-height:1.14;color:var(--ink);
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+  }
+  .act-time{font-family:'Space Mono', monospace;font-size:9px;color:#075C57;font-weight:700;margin-top:2px;}
+  .act-dots{display:flex;flex-wrap:wrap;gap:3px;margin-top:5px;}
+  .mini-dot{
+    width:16px;height:16px;border-radius:50%;border:1.5px solid var(--ink);
+    font-size:7.5px;font-weight:800;display:flex;align-items:center;justify-content:center;
+  }
+  .converge-badge{position:absolute;top:3px;right:4px;font-size:10px;}
+  .empty-note{color:var(--cream);font-family:'Space Mono', monospace;font-size:12px;padding:16px;}
+
+  .footer-hint{
+    color:var(--cream);font-family:'Space Mono', monospace;font-size:11px;
+    text-align:center;margin-top:14px;opacity:0.85;line-height:1.6;
+  }
+
+  /* who's-going modal */
+  .modal-bg{
+    position:fixed;inset:0;background:rgba(7,20,20,0.65);display:flex;
+    align-items:center;justify-content:center;z-index:60;padding:20px;
+  }
+  .modal{
+    background:var(--cream);border:3px solid var(--ink);border-radius:16px;
+    max-width:360px;width:100%;max-height:70vh;overflow-y:auto;padding:18px;
+    box-shadow:6px 6px 0 rgba(0,0,0,0.35);
+  }
+  .modal h3{font-family:'Anton';font-weight:400;margin:0 0 10px;color:#075C57;font-size:19px;}
+  .who-row{display:flex;align-items:center;gap:9px;padding:6px 0;font-weight:600;font-size:14px;}
+  .who-row .dot{width:24px;height:24px;font-size:10px;}
+  .modal-close{
+    display:block;margin:14px auto 0;background:var(--ink);color:#fff;border:none;
+    border-radius:999px;padding:8px 20px;font-weight:700;cursor:pointer;
+  }
+  .none-yet{font-family:'Space Mono';font-size:12px;color:#556;}
+
+  .loading{color:var(--cream);font-family:'Space Mono';padding:40px;text-align:center;}
+  .sync-banner{
+    background:#FFD23E;color:#12181A;border:2px solid var(--ink);border-radius:10px;
+    padding:9px 13px;font-family:'Space Mono', monospace;font-size:12px;font-weight:700;
+    margin-bottom:10px;box-shadow:3px 3px 0 rgba(0,0,0,0.25);
+  }
+</style>
+</head>
+<body>
+<div class="wrap" id="app"><div class="loading">loading FoggyBisonHerd…</div></div>
+
+<script>
+/* ---------- color palette (up to 30 distinguishable colors) ---------- */
+const PALETTE = [
+  '#E63946','#D62839','#F3722C','#F8961E','#F9844A','#C9A227','#90A926','#52D726',
+  '#2D6A4F','#1B998B','#17E0D1','#118AB2','#1D75FB','#3A0CA3','#6A4C93','#9B5DE5',
+  '#D62AD0','#FF3D7F','#C9184A','#8B5E22','#6F4518','#495057','#16181A','#FF6B6B',
+  '#06D6A0','#EF476F','#FFB703','#023E8A','#7209B7','#B5179E'
+];
+
+function contrastText(hex){
+  const c = hex.replace('#','');
+  const r = parseInt(c.substr(0,2),16), g = parseInt(c.substr(2,2),16), b = parseInt(c.substr(4,2),16);
+  const lum = (0.299*r + 0.587*g + 0.114*b)/255;
+  return lum > 0.6 ? '#12181A' : '#FFFFFF';
+}
+
+/* ---------- schedule data ---------- */
+function tp(h,m){ return (h%12)*60 + m; }
+function lbl(h1,m1,h2,m2){
+  const f=(h,m)=>`${h}:${m.toString().padStart(2,'0')}`;
+  return `${f(h1,m1)}–${f(h2,m2)} PM`;
+}
+const DAY_PREFIX = { Friday:'F', Saturday:'A', Sunday:'U' };
+function A(day,stage,name,h1,m1,h2,m2,id){
+  return {id: DAY_PREFIX[day]+'-'+id, stage, name, s:tp(h1,m1), e:tp(h2,m2), label: lbl(h1,m1,h2,m2)};
+}
+
+const STAGES = {
+  Friday:   [['lands-end','Lands End'],['twin-peaks','Twin Peaks'],['sutro','Sutro'],['panhandle','Panhandle'],['soma','Soma'],['dolores',"Hot Goth GF @ Dolores'"],['duboce','Duboce Triangle'],['cocktail','Cocktail Magic']],
+  Saturday: [['lands-end','Lands End'],['twin-peaks','Twin Peaks'],['sutro','Sutro'],['panhandle','Panhandle'],['soma','Soma'],['dolores',"Oasis @ Dolores'"],['duboce','Duboce Triangle'],['cocktail','Cocktail Magic']],
+  Sunday:   [['lands-end','Lands End'],['twin-peaks','Twin Peaks'],['sutro','Sutro'],['panhandle','Panhandle'],['soma','Soma'],['dolores',"Polyglamorous @ Dolores'"],['duboce','Duboce Triangle'],['cocktail','Cocktail Magic']]
+};
+
+const ACTS = {
+Friday: [
+  A('Friday','lands-end','Faouzia',12,5,12,50,'a1'),
+  A('Friday','lands-end','Grace Ives',1,20,2,5,'a2'),
+  A('Friday','lands-end','Durand Bernarr',2,35,3,25,'a3'),
+  A('Friday','lands-end','Wet Leg',3,55,4,45,'a4'),
+  A('Friday','lands-end','GloRilla',5,15,6,15,'a5'),
+  A('Friday','lands-end','Labrinth',6,45,7,55,'a6'),
+  A('Friday','lands-end','Charli XCX',8,40,9,55,'a7'),
+
+  A('Friday','twin-peaks','Nezza',12,35,1,20,'b1'),
+  A('Friday','twin-peaks','Kerala Dust',2,5,2,50,'b2'),
+  A('Friday','twin-peaks','Alleycvt',3,35,4,25,'b3'),
+  A('Friday','twin-peaks','Tinashe',5,10,6,0,'b4'),
+  A('Friday','twin-peaks','Clipse',6,45,7,35,'b5'),
+  A('Friday','twin-peaks','Griztronics',8,25,9,50,'b6'),
+
+  A('Friday','sutro','Bad Nerves',12,25,1,10,'c1'),
+  A('Friday','sutro','Die Spitz',1,40,2,25,'c2'),
+  A('Friday','sutro','The Story So Far',2,55,3,40,'c3'),
+  A('Friday','sutro','Sierra Ferrell',4,10,5,10,'c4'),
+  A('Friday','sutro','Geese',5,50,6,50,'c5'),
+  A('Friday','sutro','Turnstile',7,20,8,20,'c6'),
+  A('Friday','sutro','Modest Mouse',8,50,9,50,'c7'),
+
+  A('Friday','panhandle','Dani Satin & Always Hallways',12,0,12,30,'d1'),
+  A('Friday','panhandle','Chezile',1,20,2,0,'d2'),
+  A('Friday','panhandle','Sawyer Hill',2,50,3,30,'d3'),
+  A('Friday','panhandle','Billie Marten',4,25,5,5,'d4'),
+  A('Friday','panhandle','Goldie Boutilier',6,0,6,40,'d5'),
+  A('Friday','panhandle','Dylan Brady',7,35,8,20,'d6'),
+  A('Friday','panhandle','Odd Mob & Omnom present Hyperbeam',8,25,9,55,'d7'),
+
+  A('Friday','soma','Vertigo',12,0,12,55,'e1'),
+  A('Friday','soma','Luke Alessi',12,55,2,25,'e2'),
+  A('Friday','soma','Tobiahs',2,25,3,55,'e3'),
+  A('Friday','soma','MPH',3,55,5,25,'e4'),
+  A('Friday','soma','Ki/Ki',5,25,6,55,'e5'),
+  A('Friday','soma','Yøsuke Yukimatsu',6,55,8,25,'e6'),
+
+  A('Friday','dolores','DJ Erinyes',12,30,1,15,'f1'),
+  A('Friday','dolores','DJ Dolomedes',1,15,2,0,'f2'),
+  A('Friday','dolores','Pink Stiletto',2,0,2,30,'f3'),
+  A('Friday','dolores','DJ Starr Noir',2,30,3,20,'f4'),
+  A('Friday','dolores','Hot Goth Freak Show',3,20,3,50,'f5'),
+  A('Friday','dolores','Soltera',3,50,4,35,'f6'),
+  A('Friday','dolores','DJ Hopeless & Hot Goth Pole Show',4,35,5,20,'f7'),
+  A('Friday','dolores','Ms. Boan',5,20,6,5,'f8'),
+  A('Friday','dolores','Hot Goth Freak Show',6,5,6,35,'f9'),
+  A('Friday','dolores','Light Asylum',6,45,7,30,'f10'),
+  A('Friday','dolores','Romy (DJ Set)',7,30,8,30,'f11'),
+
+  A('Friday','duboce','Nezza',2,5,2,35,'g1'),
+  A('Friday','duboce','Chezile',3,25,3,55,'g2'),
+  A('Friday','duboce','Luke Alessi',4,45,5,15,'g3'),
+  A('Friday','duboce','Alleycvt',6,15,6,45,'g4'),
+  A('Friday','duboce','Tobiahs',7,55,8,40,'g5'),
+
+  A('Friday','cocktail','Bingo Loco',12,30,1,15,'h1'),
+  A('Friday','cocktail','Bingo Loco',1,40,2,25,'h2'),
+  A('Friday','cocktail','Bingo Loco',2,50,3,35,'h3'),
+  A('Friday','cocktail','Open Mic — Rainbow Girls',4,5,4,50,'h4'),
+  A('Friday','cocktail','Bootie Mashup: Diva Pop w/ DJ Tyme',5,5,6,5,'h5'),
+  A('Friday','cocktail','The Emo Night Tour',6,20,7,20,'h6'),
+],
+Saturday: [
+  A('Saturday','lands-end','Bandalos Chinos',12,10,12,55,'a1'),
+  A('Saturday','lands-end','Haute & Freddy',1,25,2,10,'a2'),
+  A('Saturday','lands-end','Audrey Hobert',2,40,3,30,'a3'),
+  A('Saturday','lands-end','Lucy Dacus',4,0,4,50,'a4'),
+  A('Saturday','lands-end','Ethel Cain',5,20,6,20,'a5'),
+  A('Saturday','lands-end','DJO',6,50,7,50,'a6'),
+  A('Saturday','lands-end','The Strokes',8,35,9,55,'a7'),
+
+  A('Saturday','twin-peaks','Red Leather',12,30,1,10,'b1'),
+  A('Saturday','twin-peaks','After',1,55,2,35,'b2'),
+  A('Saturday','twin-peaks','Łaszewo',3,10,4,0,'b3'),
+  A('Saturday','twin-peaks','Malcolm Todd',4,45,5,45,'b4'),
+  A('Saturday','twin-peaks','Dijon',6,30,7,20,'b5'),
+  A('Saturday','twin-peaks','The XX',8,10,9,25,'b6'),
+
+  A('Saturday','sutro','Rio Kosta',12,35,1,20,'c1'),
+  A('Saturday','sutro','Wunderhorse',1,50,2,35,'c2'),
+  A('Saturday','sutro','Sienna Spiro',3,5,3,50,'c3'),
+  A('Saturday','sutro','Yard Act',4,20,5,5,'c4'),
+  A('Saturday','sutro','Snow Strippers',5,35,6,20,'c5'),
+  A('Saturday','sutro',"It's Murph",6,50,8,0,'c6'),
+  A('Saturday','sutro','PinkPantheress',8,45,9,45,'c7'),
+
+  A('Saturday','panhandle','Ryman',12,0,12,30,'d1'),
+  A('Saturday','panhandle','Racing Mount Pleasant',1,10,1,50,'d2'),
+  A('Saturday','panhandle','Ally Evenson',2,35,3,5,'d3'),
+  A('Saturday','panhandle','Automatic',4,0,4,40,'d4'),
+  A('Saturday','panhandle','Silvana Estrada',5,45,6,25,'d5'),
+  A('Saturday','panhandle','DJ Trixie Mattel',7,20,8,5,'d6'),
+
+  A('Saturday','soma','Bad Juuju',12,35,1,55,'e1'),
+  A('Saturday','soma','I-800 Girls',1,55,3,25,'e2'),
+  A('Saturday','soma','Camoufly',3,25,4,55,'e3'),
+  A('Saturday','soma','Sultan + Shepard',4,55,6,25,'e4'),
+  A('Saturday','soma','Ben Böhmer',6,40,8,10,'e5'),
+  A('Saturday','soma','Lane 8',8,25,9,55,'e6'),
+
+  A('Saturday','dolores','Oasis DJ Set: Beverly Chills',12,30,1,15,'f1'),
+  A('Saturday','dolores',"Out Tonight: Musical Singalong feat. D'Arcy Drollinger",1,15,2,15,'f2'),
+  A('Saturday','dolores','Reparations w/ Nicki Jizz feat. Kori King',3,15,4,45,'f3'),
+  A('Saturday','dolores','Oasis DJ Set: DJ Ion the Prize',4,45,5,45,'f4'),
+  A('Saturday','dolores','Princess w/ Tito Soto feat. Lydia B Kollins',5,45,7,15,'f5'),
+  A('Saturday','dolores','Princess DJ Set: DJ Vrok',7,15,8,30,'f6'),
+
+  A('Saturday','duboce','Surprise Guest',12,15,1,45,'g1'),
+  A('Saturday','duboce','Bandalos Chinos',2,10,2,40,'g2'),
+  A('Saturday','duboce','Racing Mount Pleasant',3,30,4,0,'g3'),
+  A('Saturday','duboce','Rio Kosta DJ Set',4,50,5,20,'g4'),
+  A('Saturday','duboce','Łaszewo',6,20,6,50,'g5'),
+  A('Saturday','duboce','Bad Juuju',7,50,8,35,'g6'),
+
+  A('Saturday','cocktail','Bingo Loco',12,30,1,15,'h1'),
+  A('Saturday','cocktail','Bingo Loco',1,40,2,25,'h2'),
+  A('Saturday','cocktail','Bingo Loco',2,50,3,35,'h3'),
+  A('Saturday','cocktail','Open Mic — Rainbow Girls',4,5,4,50,'h4'),
+  A('Saturday','cocktail','Bootie Mashup: Hip Hop Fuego w/ DJ Airsun',5,5,6,5,'h5'),
+  A('Saturday','cocktail','Electric Feels',6,20,7,20,'h6'),
+],
+Sunday: [
+  A('Sunday','lands-end',"San Francisco Gay Men's Chorus",12,0,12,40,'a1'),
+  A('Sunday','lands-end','Sports',1,10,1,55,'a2'),
+  A('Sunday','lands-end','Balu Brigada',2,25,3,15,'a3'),
+  A('Sunday','lands-end','Jade',3,45,4,45,'a4'),
+  A('Sunday','lands-end','Disco Lines',5,15,6,15,'a5'),
+  A('Sunday','lands-end','Empire of the Sun',6,45,7,45,'a6'),
+  A('Sunday','lands-end','RÜFÜS DU SOL',8,25,9,55,'a7'),
+
+  A('Sunday','twin-peaks','Magnus Ferrell',12,45,1,25,'b1'),
+  A('Sunday','twin-peaks','Sosocamo',2,10,2,55,'b2'),
+  A('Sunday','twin-peaks','Destin Conrad',3,40,4,30,'b3'),
+  A('Sunday','twin-peaks','KWN',5,15,6,5,'b4'),
+  A('Sunday','twin-peaks','Mariah the Scientist',6,50,7,50,'b5'),
+  A('Sunday','twin-peaks','Baby Keem',8,40,9,55,'b6'),
+
+  A('Sunday','sutro','Death Cab for Cutie',12,40,1,30,'c1'),
+  A('Sunday','sutro','Momma',3,0,3,45,'c2'),
+  A('Sunday','sutro','Kingfishr',4,15,5,5,'c3'),
+  A('Sunday','sutro','The Temper Trap',5,35,6,25,'c4'),
+  A('Sunday','sutro','Not for Radio',7,5,7,55,'c5'),
+  A('Sunday','sutro','Death Cab for Cutie',8,25,9,40,'c6'),
+
+  A('Sunday','panhandle','Cruz Beckham',12,0,12,40,'d1'),
+  A('Sunday','panhandle','Day We Ran',1,25,2,5,'d2'),
+  A('Sunday','panhandle','Amble',2,55,3,35,'d3'),
+  A('Sunday','panhandle','Night Tapes',4,30,5,10,'d4'),
+  A('Sunday','panhandle','Infinity Song',6,5,6,45,'d5'),
+  A('Sunday','panhandle','Frost Children',7,50,8,35,'d6'),
+
+  A('Sunday','soma','Etari',12,5,1,35,'e1'),
+  A('Sunday','soma','X Club.',1,35,3,10,'e2'),
+  A('Sunday','soma','Carlita',3,10,4,45,'e3'),
+  A('Sunday','soma','Boys Noize',4,45,6,20,'e4'),
+  A('Sunday','soma','Miss Monique',6,20,7,55,'e5'),
+  A('Sunday','soma','Boris Brejcha',7,55,9,55,'e6'),
+
+  A('Sunday','dolores','Charles Hawthorne',12,45,2,25,'f1'),
+  A('Sunday','dolores',"Mark O'Brien",2,25,3,45,'f2'),
+  A('Sunday','dolores','Grace Towers & Friends',3,45,4,5,'f3'),
+  A('Sunday','dolores','Stanley Frank Sensation',4,5,5,5,'f4'),
+  A('Sunday','dolores','Beya',5,5,6,5,'f5'),
+  A('Sunday','dolores','Grace Towers & Friends',6,5,6,25,'f6'),
+  A('Sunday','dolores','Elaine & Robin',6,25,7,25,'f7'),
+  A('Sunday','dolores','DJ Minx',7,25,8,25,'f8'),
+
+  A('Sunday','duboce','Britton',2,5,2,35,'g1'),
+  A('Sunday','duboce','Day We Ran',3,25,3,55,'g2'),
+  A('Sunday','duboce','Frost Children DJ Set',4,45,5,30,'g3'),
+  A('Sunday','duboce','Marlon Funaki',6,15,6,45,'g4'),
+  A('Sunday','duboce','Surprise Guest',7,45,8,45,'g5'),
+
+  A('Sunday','cocktail','Bingo Loco',12,30,1,15,'h1'),
+  A('Sunday','cocktail','Bingo Loco',1,40,2,25,'h2'),
+  A('Sunday','cocktail','Bingo Loco',2,50,3,35,'h3'),
+  A('Sunday','cocktail','Open Mic — Rainbow Girls',4,5,4,50,'h4'),
+  A('Sunday','cocktail','Aidan Corcoran',5,15,5,45,'h5'),
+  A('Sunday','cocktail','Help Me Lose My Mind: UK Garage & House w/ MPHD',6,0,7,0,'h6'),
+]
+};
+
+/* ---------- state ---------- */
+let people = [];       // [{id, name, color}]
+let picks = {};         // {personId: [actId,...]}
+let myId = null;
+let currentDay = 'Friday';
+let filterMode = 'all';
+let addFormOpen = false;
+let pendingColor = PALETTE[0];
+let draftName = '';
+let whoModalActId = null;
+
+const app = document.getElementById('app');
+
+/* ---------- firebase realtime database ---------- */
+const FB_URL = 'https://foggy-bison-herd-default-rtdb.firebaseio.com'.replace(/\/+$/,'');
+const DATA_NODE = '/foggybisonherd-data';
+let pendingRemoteData = null;
+
+function idFromHash(){
+  const m = location.hash.match(/id=([A-Za-z0-9_]+)/);
+  return m ? m[1] : null;
+}
+function setHashId(id){
+  history.replaceState(null, '', '#id=' + id);
+}
+
+async function fetchInitial(){
+  try{
+    const res = await fetch(FB_URL + DATA_NODE + '.json');
+    const d = await res.json();
+    if(d){ people = d.people||[]; picks = d.picks||{}; }
+  }catch(e){ console.error('initial load failed', e); }
+}
+
+async function saveData(){
+  const payload = {people,picks};
+  const ok = await retryPut(payload);
+  syncOk = ok;
+  if(!ok) scheduleSyncRetry(payload);
+  render();
+  return ok;
+}
+
+// retries a firebase write a few times with backoff; returns true/false
+async function retryPut(payload, attempts=3){
+  for(let i=0;i<attempts;i++){
+    try{
+      const res = await fetch(FB_URL + DATA_NODE + '.json', {
+        method:'PUT',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify(payload)
+      });
+      if(!res.ok) throw new Error('HTTP '+res.status);
+      return true;
+    }catch(e){
+      console.error('save attempt '+(i+1)+' failed', e);
+      if(i < attempts-1) await new Promise(r=>setTimeout(r, 700*(i+1)));
+    }
+  }
+  return false;
+}
+
+// if a save still fails after retries, keep trying quietly in the background
+let syncOk = true;
+let syncRetryTimer = null;
+function scheduleSyncRetry(payload){
+  if(syncRetryTimer) clearTimeout(syncRetryTimer);
+  syncRetryTimer = setTimeout(async ()=>{
+    const ok = await retryPut(payload);
+    syncOk = ok;
+    if(!ok){ scheduleSyncRetry(payload); }
+    render();
+  }, 5000);
+}
+
+// live push updates via Firebase's SSE stream (no polling needed)
+let streamRetryDelay = 2000;
+function connectStream(){
+  let es;
+  try{ es = new EventSource(FB_URL + DATA_NODE + '.json'); }
+  catch(e){ console.error('live stream unsupported in this browser', e); return; }
+
+  const applyIncoming = (raw)=>{
+    let msg;
+    try{ msg = JSON.parse(raw); }catch(e){ return; }
+    const d = msg.data;
+    if(d===null || d===undefined) return; // ignore empty/cleared node rather than wiping the view
+    if(addFormOpen){ pendingRemoteData = d; return; } // don't clobber someone mid-typing
+    people = d.people||[]; picks = d.picks||{};
+    streamRetryDelay = 2000;
+    render();
+  };
+
+  es.addEventListener('put', (e)=> applyIncoming(e.data));
+  es.addEventListener('patch', ()=>{ fetchInitial().then(render); });
+  es.onerror = ()=>{
+    es.close();
+    setTimeout(connectStream, streamRetryDelay);
+    streamRetryDelay = Math.min(streamRetryDelay*1.5, 15000);
+  };
+}
+
+/* ---------- helpers ---------- */
+function usedColors(){ return new Set(people.map(p=>p.color)); }
+function availableColors(){
+  const used = usedColors();
+  const free = PALETTE.filter(c=>!used.has(c));
+  return free.length ? free : PALETTE;
+}
+function initialsOf(name){
+  const parts = name.trim().split(/\s+/);
+  if(parts.length===1) return parts[0].slice(0,2).toUpperCase();
+  return (parts[0][0]+parts[parts.length-1][0]).toUpperCase();
+}
+function wantersFor(actId){
+  return people.filter(p => (picks[p.id]||[]).includes(actId));
+}
+
+function switchIdentity(id){ myId = id; addFormOpen = false; setHashId(id); render(); }
+
+function toggleAddForm(){
+  addFormOpen = !addFormOpen;
+  pendingColor = availableColors()[0] || PALETTE[0];
+  draftName = '';
+  render();
+  focusNameInput();
+}
+function cancelAddForm(){
+  addFormOpen = false; draftName='';
+  if(pendingRemoteData){ people = pendingRemoteData.people||[]; picks = pendingRemoteData.picks||{}; pendingRemoteData = null; }
+  render();
+}
+function pickColor(c){
+  const el = document.getElementById('new-person-name');
+  if(el) draftName = el.value;
+  pendingColor = c;
+  render();
+  focusNameInput();
+}
+function focusNameInput(){
+  if(!addFormOpen) return;
+  setTimeout(()=>{
+    const el = document.getElementById('new-person-name');
+    if(el){ el.focus(); const p = el.value.length; el.setSelectionRange(p,p); }
+  }, 20);
+}
+
+async function submitAddPerson(){
+  const input = document.getElementById('new-person-name');
+  const name = (input ? input.value : draftName).trim();
+  if(!name) return;
+  const id = 'p_' + Date.now() + '_' + Math.random().toString(36).slice(2,6);
+  people.push({id, name, color: pendingColor});
+  picks[id] = [];
+  draftName = '';
+  myId = id;
+  addFormOpen = false;
+  pendingRemoteData = null;
+  setHashId(id);
+  render();       // instant feedback
+  saveData();      // background
+}
+
+async function toggleWant(actId){
+  if(!myId){ toggleAddForm(); return; }
+  const set = new Set(picks[myId]||[]);
+  if(set.has(actId)) set.delete(actId); else set.add(actId);
+  picks[myId] = Array.from(set);
+  render();       // instant feedback
+  saveData();      // saves + retries in the background, re-renders only if sync status changes
+}
+
+function openWhoModal(actId){ whoModalActId = actId; render(); }
+function closeWhoModal(){ whoModalActId = null; render(); }
+
+function setDay(day){ currentDay = day; render(); }
+function setFilter(mode){ filterMode = mode; render(); }
+
+function dayBounds(day){
+  let min=Infinity,max=-Infinity;
+  ACTS[day].forEach(a=>{ if(a.s<min)min=a.s; if(a.e>max)max=a.e; });
+  if(!isFinite(min)){min=0;max=600;}
+  min = Math.floor(min/60)*60; max = Math.ceil(max/60)*60;
+  return {min,max};
+}
+
+/* ---------- long-press handling ---------- */
+let pressTimer = null;
+let pressFired = false;
+function bindPress(el, actId){
+  const start = (e)=>{
+    pressFired = false;
+    pressTimer = setTimeout(()=>{ pressFired = true; openWhoModal(actId); }, 480);
+  };
+  const clear = ()=>{ if(pressTimer) clearTimeout(pressTimer); };
+  el.addEventListener('pointerdown', start);
+  el.addEventListener('pointerup', clear);
+  el.addEventListener('pointerleave', clear);
+  el.addEventListener('pointercancel', clear);
+  el.addEventListener('click', (e)=>{
+    if(pressFired){ e.preventDefault(); pressFired=false; return; }
+    toggleWant(actId);
+  });
+  el.addEventListener('contextmenu', (e)=>{ e.preventDefault(); openWhoModal(actId); });
+}
+
+/* ---------- render ---------- */
+function render(){
+  document.body.className = 'day-' + currentDay;
+  const {min,max} = dayBounds(currentDay);
+  const PX_PER_MIN = 1.25;
+  const totalHeight = (max-min)*PX_PER_MIN + 20;
+
+  let html = '';
+  if(!syncOk){
+    html += `<div class="sync-banner">⚠ Couldn't sync your last change — retrying in the background. Keep this page open.</div>`;
+  }
+  html += `<div class="header">
+    <div class="title-block">
+      <h1>FOGGY BISON HERD</h1>
+      <div class="sub">Outside Lands 2026 · shared with your crew</div>
+    </div>
+  </div>`;
+
+  html += `<div class="day-tabs">`;
+  ['Friday','Saturday','Sunday'].forEach(d=>{
+    html += `<div class="day-tab ${d===currentDay?'active':''}" onclick="setDay('${d}')">${d.toUpperCase()}</div>`;
+  });
+  html += `</div>`;
+
+  // identity / key panel
+  html += `<div class="panel">
+    <div class="panel-label">Who's here (${people.length})</div>
+    <div class="chip-row">`;
+  people.forEach(p=>{
+    const txt = contrastText(p.color);
+    html += `<div class="person-chip ${p.id===myId?'me':''}" onclick="switchIdentity('${p.id}')">
+      <span class="dot" style="background:${p.color};color:${txt}">${initialsOf(p.name)}</span>
+      <span>${escapeHtml(p.name)}</span>
+    </div>`;
+  });
+  html += `<div class="add-person-btn" onclick="toggleAddForm()">+ add yourself</div>
+    </div>`;
+  if(addFormOpen){
+    html += `<div class="add-form">
+      <input type="text" id="new-person-name" placeholder="Your full name (e.g. Alex Rivera)" value="${escapeHtml(draftName)}" oninput="draftName=this.value;" onkeydown="if(event.key==='Enter')submitAddPerson();" />
+      <div class="swatch-grid">`;
+    PALETTE.forEach(c=>{
+      html += `<div class="swatch ${c===pendingColor?'selected':''}" style="background:${c}" onclick="pickColor('${c}');"></div>`;
+    });
+    html += `</div>
+      <div class="form-actions">
+        <button class="save-mini" onclick="submitAddPerson()">Save & join</button>
+        <button class="cancel-mini" onclick="cancelAddForm()">Cancel</button>
+      </div>
+    </div>`;
+  }
+  html += `</div>`;
+
+  // filter bar
+  html += `<div class="panel">
+    <div class="panel-label">View</div>
+    <div class="filter-row">
+      <div class="filter-chip ${filterMode==='all'?'on':''}" onclick="setFilter('all')">Everyone</div>
+      <div class="filter-chip ${filterMode==='mine'?'on':''}" onclick="setFilter('mine')">My picks only</div>
+      <div class="filter-chip ${filterMode==='popular'?'on':''}" onclick="setFilter('popular')">🔥 Popular (3+)</div>
+    </div>
+  </div>`;
+
+  // grid
+  html += `<div class="grid-outer"><div class="grid-inner">`;
+  html += `<div class="time-col" style="height:${totalHeight+50}px;">`;
+  for(let t=min; t<=max; t+=60){
+    const top = 50 + (t-min)*PX_PER_MIN;
+    const hr = Math.floor(t/60);
+    const label12 = hr===0?'12PM':(hr+':00');
+    html += `<div class="time-label" style="top:${top}px">${label12}</div>`;
+  }
+  html += `</div>`;
+
+  STAGES[currentDay].forEach(([sid,sname])=>{
+    const acts = ACTS[currentDay].filter(a=>a.stage===sid);
+    html += `<div class="stage-col">
+      <div class="stage-head">${escapeHtml(sname)}</div>
+      <div class="stage-body" style="height:${totalHeight}px;">`;
+    acts.forEach(act=>{
+      const top = (act.s-min)*PX_PER_MIN;
+      const h = Math.max((act.e-act.s)*PX_PER_MIN, 34);
+      const wanters = wantersFor(act.id);
+      const iAmIn = myId && wanters.some(w=>w.id===myId);
+      const converge = wanters.length>=3;
+      let cls = 'act';
+      if(iAmIn) cls += ' mine';
+      if(converge) cls += ' converge';
+      if(filterMode==='mine' && !iAmIn) cls += ' dimmed';
+      if(filterMode==='popular' && wanters.length<3) cls += ' dimmed';
+      html += `<div class="${cls}" id="act-${act.id}" style="top:${top}px;height:${h}px;">
+        ${converge?'<span class="converge-badge">🔥</span>':''}
+        <div class="act-name">${escapeHtml(act.name)}</div>
+        <div class="act-time">${escapeHtml(act.label)}</div>
+        <div class="act-dots">${wanters.map(w=>{const t=contrastText(w.color);return `<span class="mini-dot" style="background:${w.color};color:${t}">${initialsOf(w.name)}</span>`;}).join('')}</div>
+      </div>`;
+    });
+    if(acts.length===0) html += `<div class="empty-note">no acts yet</div>`;
+    html += `</div></div>`;
+  });
+  html += `</div></div>`;
+
+  html += `<div class="footer-hint">Tap a band to mark it • Press &amp; hold (or right-click) to see who's going</div>`;
+
+  if(whoModalActId){
+    const act = ACTS[currentDay].find(a=>a.id===whoModalActId) || Object.values(ACTS).flat().find(a=>a.id===whoModalActId);
+    const wanters = wantersFor(whoModalActId);
+    html += `<div class="modal-bg" onclick="if(event.target===this) closeWhoModal()">
+      <div class="modal">
+        <h3>${act?escapeHtml(act.name):''}</h3>
+        ${wanters.length? wanters.map(w=>{const t=contrastText(w.color);return `<div class="who-row"><span class="dot" style="background:${w.color};color:${t}">${initialsOf(w.name)}</span>${escapeHtml(w.name)}</div>`;}).join('') : '<div class="none-yet">Nobody has picked this yet.</div>'}
+        <button class="modal-close" onclick="closeWhoModal()">Close</button>
+      </div>
+    </div>`;
+  }
+
+  app.innerHTML = html;
+
+  // bind press handlers after DOM is in place
+  STAGES[currentDay].forEach(([sid])=>{
+    ACTS[currentDay].filter(a=>a.stage===sid).forEach(act=>{
+      const el = document.getElementById('act-'+act.id);
+      if(el) bindPress(el, act.id);
+    });
+  });
+}
+
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+async function init(){
+  await fetchInitial();
+  myId = idFromHash();
+  if(myId && !people.some(p=>p.id===myId)) myId = null; // stale/unknown id, start fresh
+  render();
+  connectStream();
+}
+init();
+</script>
+</body>
+</html>
