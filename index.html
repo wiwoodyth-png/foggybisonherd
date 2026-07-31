@@ -416,26 +416,16 @@ const DATA_NODE = '/foggybisonherd-data';
 let pendingRemoteData = null;
 
 const LS_KEY = 'fbh-my-id';
-function idFromHash(){
-  const m = location.hash.match(/id=([A-Za-z0-9_]+)/);
-  return m ? m[1] : null;
-}
-// identity lives in this browser's localStorage — private to this device,
-// so it can never ride along in a link someone shares with the group.
+// identity lives ONLY in this browser's localStorage — private to this device.
+// The URL is never trusted for identity, even if it contains an old-style
+// #id=... hash from a link that's already circulating — that hash is
+// scrubbed on load and ignored, so a shared link can never carry anyone's
+// identity to anyone else, no matter which copy of the link people click.
 function getStoredId(){
   try{
     const fromLS = localStorage.getItem(LS_KEY);
     if(fromLS) return fromLS;
   }catch(e){ /* localStorage unavailable (e.g. private browsing) */ }
-  // one-time migration: earlier versions stored identity in the URL hash.
-  // adopt it once, then scrub it out of the address bar so it stops
-  // being copyable/shareable from here on.
-  const fromHash = idFromHash();
-  if(fromHash){
-    setStoredId(fromHash);
-    history.replaceState(null, '', location.pathname + location.search);
-    return fromHash;
-  }
   return null;
 }
 function setStoredId(id){
@@ -803,6 +793,7 @@ function escapeHtml(s){
 }
 
 async function init(){
+  if(location.hash){ history.replaceState(null, '', location.pathname + location.search); }
   await fetchInitial();
   myId = getStoredId();
   if(myId && !people.some(p=>p.id===myId)) myId = null; // stale/unknown id, start fresh
