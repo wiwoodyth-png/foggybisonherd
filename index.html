@@ -552,6 +552,22 @@ function deletePerson(id){
     myId = null;
     clearStoredId();
   }
+  if(personSettingsFor===id) personSettingsFor = null;
+  render();
+  saveData();
+}
+
+let personSettingsFor = null;
+function openPersonSettings(id){ personSettingsFor = id; render(); }
+function closePersonSettings(){ personSettingsFor = null; render(); }
+async function savePersonName(id){
+  const input = document.getElementById('edit-person-name');
+  const newName = (input ? input.value : '').trim();
+  if(!newName) return;
+  const p = people.find(x=>x.id===id);
+  if(!p) return;
+  p.name = newName;
+  personSettingsFor = null;
   render();
   saveData();
 }
@@ -707,7 +723,7 @@ function render(){
       </div>`;
     }
   }
-  html += `<div style="font-family:'Space Mono',monospace;font-size:10.5px;color:#075C57;margin-top:8px;opacity:0.8;">Tap a name to change their color • Press &amp; hold to remove</div>`;
+  html += `<div style="font-family:'Space Mono',monospace;font-size:10.5px;color:#075C57;margin-top:8px;opacity:0.8;">Tap a name to change their color • Press &amp; hold to edit or remove</div>`;
   html += `</div>`;
 
   // filter bar
@@ -773,6 +789,25 @@ function render(){
     </div>`;
   }
 
+  if(personSettingsFor){
+    const sp = people.find(x=>x.id===personSettingsFor);
+    if(sp){
+      html += `<div class="modal-bg" onclick="if(event.target===this) closePersonSettings()">
+        <div class="modal">
+          <h3>Edit person</h3>
+          <input type="text" id="edit-person-name" value="${escapeHtml(sp.name)}"
+            style="width:100%;box-sizing:border-box;padding:9px 11px;border:2px solid var(--ink);border-radius:8px;font-family:'Inter';font-size:15px;margin-bottom:14px;"
+            onkeydown="if(event.key==='Enter')savePersonName('${sp.id}');" />
+          <div style="display:flex;gap:8px;">
+            <button class="save-mini" style="flex:1;" onclick="savePersonName('${sp.id}')">Save name</button>
+            <button class="cancel-mini" style="flex:1;color:#a33;border-color:#a33;" onclick="deletePerson('${sp.id}')">Delete</button>
+          </div>
+          <button class="modal-close" onclick="closePersonSettings()">Close</button>
+        </div>
+      </div>`;
+    }
+  }
+
   app.innerHTML = html;
 
   // bind press handlers after DOM is in place
@@ -784,7 +819,7 @@ function render(){
   });
   people.forEach(p=>{
     const el = document.getElementById('chip-'+p.id);
-    if(el) bindPress(el, ()=>toggleColorPicker(p.id), ()=>deletePerson(p.id));
+    if(el) bindPress(el, ()=>toggleColorPicker(p.id), ()=>openPersonSettings(p.id));
   });
 }
 
