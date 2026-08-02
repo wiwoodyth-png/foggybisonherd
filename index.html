@@ -61,6 +61,11 @@
   }
 
   .chip-row{display:flex;flex-wrap:wrap;gap:7px;align-items:center;}
+  .people-toggle{
+    display:none;margin-top:7px;background:none;border:none;color:#075C57;
+    font-family:'Space Mono', monospace;font-size:11.5px;font-weight:700;cursor:pointer;padding:2px 0;
+  }
+  .people-toggle:hover{text-decoration:underline;}
   .person-chip{
     display:flex;align-items:center;gap:6px;background:#fff;border:2px solid var(--ink);
     border-radius:999px;padding:5px 11px 5px 5px;cursor:pointer;font-weight:600;font-size:13px;
@@ -181,6 +186,9 @@
 
 <script>
 /* ---------- color palette (up to 30 distinguishable colors) ---------- */
+const HOT_THRESHOLD = 5; // how many people wanting an act triggers the 🔥 badge
+const PEOPLE_COLLAPSE_LIMIT = 5; // show "See more" once the crew is bigger than roughly 2 rows
+
 const PALETTE = [
   '#E63946','#D62839','#F3722C','#F8961E','#F9844A','#C9A227','#90A926','#52D726',
   '#2D6A4F','#1B998B','#17E0D1','#118AB2','#1D75FB','#3A0CA3','#6A4C93','#9B5DE5',
@@ -527,16 +535,17 @@ function wantersFor(actId){
   return people.filter(p => (picks[p.id]||[]).includes(actId));
 }
 
-let colorPickerFor = null;
-function toggleColorPicker(id){
-  colorPickerFor = (colorPickerFor === id) ? null : id;
+let highlightPersonId = null;
+let peopleExpanded = false;
+function togglePeopleExpanded(){ peopleExpanded = !peopleExpanded; render(); }
+function toggleHighlight(id){
+  highlightPersonId = (highlightPersonId === id) ? null : id;
   render();
 }
 async function setPersonColor(id, color){
   const p = people.find(x=>x.id===id);
   if(!p) return;
   p.color = color;
-  colorPickerFor = null;
   render();
   saveData();
 }
@@ -552,6 +561,7 @@ function deletePerson(id){
     myId = null;
     clearStoredId();
   }
+  if(highlightPersonId===id) highlightPersonId = null;
   if(personSettingsFor===id) personSettingsFor = null;
   render();
   saveData();
@@ -628,7 +638,7 @@ function openWhoModal(actId){ whoModalActId = actId; render(); }
 function closeWhoModal(){ whoModalActId = null; render(); }
 
 function setDay(day){ currentDay = day; render(); }
-function setFilter(mode){ filterMode = mode; render(); }
+function setFilter(mode){ filterMode = mode; highlightPersonId = null; render(); }
 
 function dayBounds(day){
   let min=Infinity,max=-Infinity;
@@ -685,16 +695,18 @@ function render(){
   // identity / key panel
   html += `<div class="panel">
     <div class="panel-label">Who's here (${people.length})</div>
-    <div class="chip-row">`;
+    <div class="chip-row" id="chip-row" style="${peopleExpanded ? '' : 'max-height:78px;overflow:hidden;'}">`;
+  html += `<div class="add-person-btn" onclick="toggleAddForm()">+ add yourself</div>`;
   people.forEach(p=>{
     const txt = contrastText(p.color);
-    html += `<div class="person-chip ${p.id===myId?'me':''}" id="chip-${p.id}">
+    const hlStyle = p.id===highlightPersonId ? `box-shadow:0 0 0 2px ${p.color}, 0 0 0 4px var(--ink);` : '';
+    html += `<div class="person-chip ${p.id===myId?'me':''}" id="chip-${p.id}" style="${hlStyle}">
       <span class="dot" style="background:${p.color};color:${txt}">${initialsOf(p.name)}</span>
       <span>${escapeHtml(p.name)}</span>
     </div>`;
   });
-  html += `<div class="add-person-btn" onclick="toggleAddForm()">+ add yourself</div>
-    </div>`;
+  html += `</div>`;
+  html += `<button id="people-toggle-btn" class="people-toggle" onclick="togglePeopleExpanded()" style="display:${people.length > PEOPLE_COLLAPSE_LIMIT ? 'inline-block' : 'none'};">${peopleExpanded ? 'See less ▲' : 'See more ▾'}</button>`;
   if(addFormOpen){
     html += `<div class="add-form">
       <input type="text" id="new-person-name" placeholder="Your full name (e.g. Ranger Dave)" value="${escapeHtml(draftName)}" oninput="draftName=this.value;" onkeydown="if(event.key==='Enter')submitAddPerson();" />
@@ -709,21 +721,7 @@ function render(){
       </div>
     </div>`;
   }
-  if(colorPickerFor){
-    const cp = people.find(x=>x.id===colorPickerFor);
-    if(cp){
-      html += `<div class="add-form">
-        <div style="font-weight:700;font-size:13px;margin-bottom:8px;">Change color for ${escapeHtml(cp.name)}</div>
-        <div class="swatch-grid">`;
-      PALETTE.forEach(c=>{
-        html += `<div class="swatch ${c===cp.color?'selected':''}" style="background:${c}" onclick="setPersonColor('${cp.id}','${c}')"></div>`;
-      });
-      html += `</div>
-        <button class="cancel-mini" onclick="colorPickerFor=null;render();">Close</button>
-      </div>`;
-    }
-  }
-  html += `<div style="font-family:'Space Mono',monospace;font-size:10.5px;color:#075C57;margin-top:8px;opacity:0.8;">Tap a name to change their color • Press &amp; hold to edit or remove</div>`;
+  html += `<div style="font-family:'Space Mono',monospace;font-size:10.5px;color:#075C57;margin-top:8px;opacity:0.8;">Tap a name to highlight their picks • Press &amp; hold to edit, recolor, or remove</div>`;
   html += `</div>`;
 
   // filter bar
@@ -732,7 +730,7 @@ function render(){
     <div class="filter-row">
       <div class="filter-chip ${filterMode==='all'?'on':''}" onclick="setFilter('all')">Everyone</div>
       <div class="filter-chip ${filterMode==='mine'?'on':''}" onclick="setFilter('mine')">My picks only</div>
-      <div class="filter-chip ${filterMode==='popular'?'on':''}" onclick="setFilter('popular')">🔥 Popular (3+)</div>
+      <div class="filter-chip ${filterMode==='popular'?'on':''}" onclick="setFilter('popular')">🔥 Popular (${HOT_THRESHOLD}+)</div>
     </div>
   </div>`;
 
@@ -757,13 +755,21 @@ function render(){
       const h = Math.max((act.e-act.s)*PX_PER_MIN, 64);
       const wanters = wantersFor(act.id);
       const iAmIn = myId && wanters.some(w=>w.id===myId);
-      const converge = wanters.length>=3;
+      const converge = wanters.length>=HOT_THRESHOLD;
+      const hlPerson = highlightPersonId ? people.find(x=>x.id===highlightPersonId) : null;
       let cls = 'act';
+      let extraStyle = '';
       if(iAmIn) cls += ' mine';
       if(converge) cls += ' converge';
-      if(filterMode==='mine' && !iAmIn) cls += ' dimmed';
-      if(filterMode==='popular' && wanters.length<3) cls += ' dimmed';
-      html += `<div class="${cls}" id="act-${act.id}" style="top:${top}px;height:${h}px;">
+      if(hlPerson){
+        const hlWanted = wanters.some(w=>w.id===hlPerson.id);
+        if(!hlWanted) cls += ' dimmed';
+        else extraStyle = `box-shadow:0 0 0 3px ${hlPerson.color}, 0 0 10px 1px ${hlPerson.color}99;`;
+      } else {
+        if(filterMode==='mine' && !iAmIn) cls += ' dimmed';
+        if(filterMode==='popular' && wanters.length<HOT_THRESHOLD) cls += ' dimmed';
+      }
+      html += `<div class="${cls}" id="act-${act.id}" style="top:${top}px;height:${h}px;${extraStyle}">
         ${converge?'<span class="converge-badge">🔥</span>':''}
         <div class="act-name">${escapeHtml(act.name)}</div>
         <div class="act-time">${escapeHtml(act.label)}</div>
@@ -776,6 +782,11 @@ function render(){
   html += `</div></div>`;
 
   html += `<div class="footer-hint">Tap a band to mark it • Press &amp; hold (or right-click) to see who's going</div>`;
+
+  html += `<div class="panel" style="padding:10px;">
+    <div class="panel-label" style="margin-bottom:6px;">Festival Map</div>
+    <img src="map.jpg" alt="Outside Lands festival grounds map" style="width:100%;display:block;border-radius:12px;border:2px solid var(--ink);" />
+  </div>`;
 
   if(whoModalActId){
     const act = ACTS[currentDay].find(a=>a.id===whoModalActId) || Object.values(ACTS).flat().find(a=>a.id===whoModalActId);
@@ -796,8 +807,14 @@ function render(){
         <div class="modal">
           <h3>Edit person</h3>
           <input type="text" id="edit-person-name" value="${escapeHtml(sp.name)}"
-            style="width:100%;box-sizing:border-box;padding:9px 11px;border:2px solid var(--ink);border-radius:8px;font-family:'Inter';font-size:15px;margin-bottom:14px;"
+            style="width:100%;box-sizing:border-box;padding:9px 11px;border:2px solid var(--ink);border-radius:8px;font-family:'Inter';font-size:15px;margin-bottom:12px;"
             onkeydown="if(event.key==='Enter')savePersonName('${sp.id}');" />
+          <div style="font-weight:700;font-size:12.5px;margin-bottom:7px;color:#075C57;">Color</div>
+          <div class="swatch-grid" style="margin-bottom:14px;">`;
+      PALETTE.forEach(c=>{
+        html += `<div class="swatch ${c===sp.color?'selected':''}" style="background:${c}" onclick="setPersonColor('${sp.id}','${c}')"></div>`;
+      });
+      html += `</div>
           <div style="display:flex;gap:8px;">
             <button class="save-mini" style="flex:1;" onclick="savePersonName('${sp.id}')">Save name</button>
             <button class="cancel-mini" style="flex:1;color:#a33;border-color:#a33;" onclick="deletePerson('${sp.id}')">Delete</button>
@@ -819,7 +836,7 @@ function render(){
   });
   people.forEach(p=>{
     const el = document.getElementById('chip-'+p.id);
-    if(el) bindPress(el, ()=>toggleColorPicker(p.id), ()=>openPersonSettings(p.id));
+    if(el) bindPress(el, ()=>toggleHighlight(p.id), ()=>openPersonSettings(p.id));
   });
 }
 
