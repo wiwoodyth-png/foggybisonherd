@@ -60,7 +60,7 @@
     letter-spacing:1px;color:#075C57;font-weight:700;margin-bottom:8px;
   }
 
-  .chip-row{display:flex;flex-wrap:wrap;gap:7px;align-items:center;}
+  .chip-row{display:flex;flex-wrap:wrap;gap:7px;align-items:center;padding:5px 2px;}
   .people-toggle{
     display:none;margin-top:7px;background:none;border:none;color:#075C57;
     font-family:'Space Mono', monospace;font-size:11.5px;font-weight:700;cursor:pointer;padding:2px 0;
@@ -695,7 +695,7 @@ function render(){
   // identity / key panel
   html += `<div class="panel">
     <div class="panel-label">Who's here (${people.length})</div>
-    <div class="chip-row" id="chip-row" style="${peopleExpanded ? '' : 'max-height:78px;overflow:hidden;'}">`;
+    <div class="chip-row" id="chip-row" style="${peopleExpanded ? '' : 'max-height:92px;overflow:hidden;'}">`;
   html += `<div class="add-person-btn" onclick="toggleAddForm()">+ add yourself</div>`;
   people.forEach(p=>{
     const txt = contrastText(p.color);
