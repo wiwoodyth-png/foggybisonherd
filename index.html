@@ -187,6 +187,16 @@
     font-family:'Space Mono',monospace;font-size:13px;cursor:pointer;
     -webkit-touch-callout:none;user-select:none;
   }
+  .map-zoom-controls{
+    position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:70;
+    display:flex;gap:10px;
+  }
+  .map-zoom-btn{
+    width:46px;height:46px;border-radius:50%;background:var(--ink);color:#FFD23E;
+    border:2px solid #FFD23E;font-size:22px;font-weight:700;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+    -webkit-touch-callout:none;user-select:none;
+  }
   .search-result{cursor:pointer;border-bottom:1px solid var(--line);}
   .search-result:hover{background:#f2ecd8;}
   #search-input{
@@ -679,19 +689,25 @@ function openSearch(){
 function closeSearch(){ searchOpen = false; render(); }
 
 let mapModalOpen = false;
-const VIEWPORT_LOCKED = 'width=device-width, initial-scale=1.0, maximum-scale=1.0';
-const VIEWPORT_ZOOMABLE = 'width=device-width, initial-scale=1.0';
+let mapZoom = 1;
 function openMapModal(){
   mapModalOpen = true;
-  const vp = document.querySelector('meta[name="viewport"]');
-  if(vp) vp.setAttribute('content', VIEWPORT_ZOOMABLE);
+  mapZoom = 1;
   render();
 }
 function closeMapModal(){
   mapModalOpen = false;
-  const vp = document.querySelector('meta[name="viewport"]');
-  if(vp) vp.setAttribute('content', VIEWPORT_LOCKED);
   render();
+}
+function zoomMapIn(){
+  mapZoom = Math.min(mapZoom + 0.5, 3);
+  const img = document.getElementById('map-modal-img');
+  if(img) img.style.width = (mapZoom*100) + '%';
+}
+function zoomMapOut(){
+  mapZoom = Math.max(mapZoom - 0.5, 1);
+  const img = document.getElementById('map-modal-img');
+  if(img) img.style.width = (mapZoom*100) + '%';
 }
 
 
@@ -752,20 +768,38 @@ function dayBounds(day){
 }
 
 /* ---------- long-press handling ---------- */
-let pressTimer = null;
-let pressFired = false;
+// The popup only opens on release (pointerup), never while the finger is
+// still down. Opening mid-hold was what let iOS's own long-press detector
+// independently fire its copy/select menu on whatever text just appeared
+// under the still-resting finger — deferring to release removes that
+// window entirely, since there's no "finger resting on brand-new content"
+// moment left for iOS to misinterpret.
 function bindPress(el, onTap, onHold){
-  const start = (e)=>{
-    pressFired = false;
-    pressTimer = setTimeout(()=>{ pressFired = true; onHold(); }, 480);
+  let timer = null;
+  let longHeld = false;
+  let suppressClick = false;
+  const start = ()=>{
+    longHeld = false;
+    timer = setTimeout(()=>{ longHeld = true; }, 480);
   };
-  const clear = ()=>{ if(pressTimer) clearTimeout(pressTimer); };
+  const release = ()=>{
+    if(timer) clearTimeout(timer);
+    if(longHeld){
+      longHeld = false;
+      suppressClick = true;
+      onHold();
+    }
+  };
+  const cancel = ()=>{
+    if(timer) clearTimeout(timer);
+    longHeld = false;
+  };
   el.addEventListener('pointerdown', start);
-  el.addEventListener('pointerup', clear);
-  el.addEventListener('pointerleave', clear);
-  el.addEventListener('pointercancel', clear);
+  el.addEventListener('pointerup', release);
+  el.addEventListener('pointerleave', cancel);
+  el.addEventListener('pointercancel', cancel);
   el.addEventListener('click', (e)=>{
-    if(pressFired){ e.preventDefault(); pressFired=false; return; }
+    if(suppressClick){ e.preventDefault(); suppressClick=false; return; }
     onTap();
   });
   el.addEventListener('contextmenu', (e)=>{ e.preventDefault(); onHold(); });
@@ -825,7 +859,7 @@ function render(){
       </div>
     </div>`;
   }
-  html += `<div style="font-family:'Space Mono',monospace;font-size:10.5px;color:#075C57;margin-top:8px;opacity:0.8;">Tap a name to highlight their picks • Press &amp; hold to edit, recolor, or remove</div>`;
+  html += `<div style="font-family:'Space Mono',monospace;font-size:10.5px;color:#075C57;margin-top:8px;opacity:0.8;">Tap a name to highlight their picks • Press &amp; hold a name to edit it, recolor, remove, or edit their picks on this device</div>`;
   html += `</div>`;
 
   // filter bar
@@ -895,7 +929,11 @@ function render(){
   if(mapModalOpen){
     html += `<div class="modal-bg" style="padding:10px;" onclick="if(event.target===this) closeMapModal()">
       <div class="map-modal">
-        <img src="map.jpg" alt="Outside Lands festival grounds map" />
+        <img id="map-modal-img" src="map.jpg" alt="Outside Lands festival grounds map" style="width:${mapZoom*100}%;" />
+      </div>
+      <div class="map-zoom-controls">
+        <button class="map-zoom-btn" onclick="zoomMapOut()">−</button>
+        <button class="map-zoom-btn" onclick="zoomMapIn()">+</button>
       </div>
       <button class="map-modal-close" onclick="closeMapModal()">✕ Close</button>
     </div>`;
