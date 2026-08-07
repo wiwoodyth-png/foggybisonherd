@@ -232,6 +232,15 @@ const PALETTE = [
   '#06D6A0','#EF476F','#FFB703','#023E8A','#7209B7','#B5179E'
 ];
 
+const GENRES = [
+  {name:'Pop', color:'#FF3D7F'},
+  {name:'Rap', color:'#FFB703'},
+  {name:'Rock', color:'#E63946'},
+  {name:'Electronic', color:'#17E0D1'},
+  {name:'Folk/Country', color:'#90A926'},
+  {name:'R&B', color:'#9B5DE5'}
+];
+
 function contrastText(hex){
   const c = hex.replace('#','');
   const r = parseInt(c.substr(0,2),16), g = parseInt(c.substr(2,2),16), b = parseInt(c.substr(4,2),16);
@@ -246,8 +255,8 @@ function lbl(h1,m1,h2,m2){
   return `${f(h1,m1)}–${f(h2,m2)} PM`;
 }
 const DAY_PREFIX = { Friday:'F', Saturday:'A', Sunday:'U' };
-function A(day,stage,name,h1,m1,h2,m2,id){
-  return {id: DAY_PREFIX[day]+'-'+id, stage, name, s:tp(h1,m1), e:tp(h2,m2), label: lbl(h1,m1,h2,m2)};
+function A(day,stage,name,h1,m1,h2,m2,id,genre){
+  return {id: DAY_PREFIX[day]+'-'+id, stage, name, s:tp(h1,m1), e:tp(h2,m2), label: lbl(h1,m1,h2,m2), genre};
 }
 
 const STAGES = {
@@ -258,186 +267,186 @@ const STAGES = {
 
 const ACTS = {
 Friday: [
-  A('Friday','lands-end','Faouzia',12,5,12,50,'a1'),
-  A('Friday','lands-end','Grace Ives',1,20,2,5,'a2'),
-  A('Friday','lands-end','Durand Bernarr',2,35,3,25,'a3'),
-  A('Friday','lands-end','Wet Leg',3,55,4,45,'a4'),
-  A('Friday','lands-end','GloRilla',5,15,6,15,'a5'),
-  A('Friday','lands-end','Labrinth',6,45,7,55,'a6'),
-  A('Friday','lands-end','Charli XCX',8,40,9,55,'a7'),
+  A('Friday','lands-end','Faouzia',12,5,12,50,'a1','Pop'),
+  A('Friday','lands-end','Grace Ives',1,20,2,5,'a2','Electronic'),
+  A('Friday','lands-end','Durand Bernarr',2,35,3,25,'a3','R&B'),
+  A('Friday','lands-end','Wet Leg',3,55,4,45,'a4','Rock'),
+  A('Friday','lands-end','GloRilla',5,15,6,15,'a5','Rap'),
+  A('Friday','lands-end','Labrinth',6,45,7,55,'a6','R&B'),
+  A('Friday','lands-end','Charli XCX',8,40,9,55,'a7','Pop'),
 
-  A('Friday','twin-peaks','Nezza',12,35,1,20,'b1'),
-  A('Friday','twin-peaks','Kerala Dust',2,5,2,50,'b2'),
-  A('Friday','twin-peaks','Alleycvt',3,35,4,25,'b3'),
-  A('Friday','twin-peaks','Tinashe',5,10,6,0,'b4'),
-  A('Friday','twin-peaks','Clipse',6,45,7,35,'b5'),
-  A('Friday','twin-peaks','Griztronics',8,25,9,50,'b6'),
+  A('Friday','twin-peaks','Nezza',12,35,1,20,'b1','Pop'),
+  A('Friday','twin-peaks','Kerala Dust',2,5,2,50,'b2','Electronic'),
+  A('Friday','twin-peaks','Alleycvt',3,35,4,25,'b3','Electronic'),
+  A('Friday','twin-peaks','Tinashe',5,10,6,0,'b4','Pop'),
+  A('Friday','twin-peaks','Clipse',6,45,7,35,'b5','Rap'),
+  A('Friday','twin-peaks','Griztronics',8,25,9,50,'b6','Electronic'),
 
-  A('Friday','sutro','Bad Nerves',12,25,1,10,'c1'),
-  A('Friday','sutro','Die Spitz',1,40,2,25,'c2'),
-  A('Friday','sutro','The Story So Far',2,55,3,40,'c3'),
-  A('Friday','sutro','Sierra Ferrell',4,10,5,10,'c4'),
-  A('Friday','sutro','Geese',5,50,6,50,'c5'),
-  A('Friday','sutro','Turnstile',7,20,8,20,'c6'),
-  A('Friday','sutro','Modest Mouse',8,50,9,50,'c7'),
+  A('Friday','sutro','Bad Nerves',12,25,1,10,'c1','Rock'),
+  A('Friday','sutro','Die Spitz',1,40,2,25,'c2','Rock'),
+  A('Friday','sutro','The Story So Far',2,55,3,40,'c3','Rock'),
+  A('Friday','sutro','Sierra Ferrell',4,10,5,10,'c4','Folk/Country'),
+  A('Friday','sutro','Geese',5,50,6,50,'c5','Rock'),
+  A('Friday','sutro','Turnstile',7,20,8,20,'c6','Rock'),
+  A('Friday','sutro','Modest Mouse',8,50,9,50,'c7','Rock'),
 
-  A('Friday','panhandle','Dani Satin & Always Hallways',12,0,12,30,'d1'),
-  A('Friday','panhandle','Chezile',1,20,2,0,'d2'),
-  A('Friday','panhandle','Sawyer Hill',2,50,3,30,'d3'),
-  A('Friday','panhandle','Billie Marten',4,25,5,5,'d4'),
-  A('Friday','panhandle','Goldie Boutilier',6,0,6,40,'d5'),
-  A('Friday','panhandle','Dylan Brady',7,35,8,20,'d6'),
-  A('Friday','panhandle','Odd Mob & Omnom present Hyperbeam',8,25,9,55,'d7'),
+  A('Friday','panhandle','Dani Satin & Always Hallways',12,0,12,30,'d1','Pop'),
+  A('Friday','panhandle','Chezile',1,20,2,0,'d2','Pop'),
+  A('Friday','panhandle','Sawyer Hill',2,50,3,30,'d3','Rock'),
+  A('Friday','panhandle','Billie Marten',4,25,5,5,'d4','Folk/Country'),
+  A('Friday','panhandle','Goldie Boutilier',6,0,6,40,'d5','Pop'),
+  A('Friday','panhandle','Dylan Brady',7,35,8,20,'d6','Electronic'),
+  A('Friday','panhandle','Odd Mob & Omnom present Hyperbeam',8,25,9,55,'d7','Electronic'),
 
-  A('Friday','soma','Vertigo',12,0,12,55,'e1'),
-  A('Friday','soma','Luke Alessi',12,55,2,25,'e2'),
-  A('Friday','soma','Tobiahs',2,25,3,55,'e3'),
-  A('Friday','soma','MPH',3,55,5,25,'e4'),
-  A('Friday','soma','Ki/Ki',5,25,6,55,'e5'),
-  A('Friday','soma','Yøsuke Yukimatsu',6,55,8,25,'e6'),
+  A('Friday','soma','Vertigo',12,0,12,55,'e1','Electronic'),
+  A('Friday','soma','Luke Alessi',12,55,2,25,'e2','Electronic'),
+  A('Friday','soma','Tobiahs',2,25,3,55,'e3','Electronic'),
+  A('Friday','soma','MPH',3,55,5,25,'e4','Electronic'),
+  A('Friday','soma','Ki/Ki',5,25,6,55,'e5','Electronic'),
+  A('Friday','soma','Yøsuke Yukimatsu',6,55,8,25,'e6','Electronic'),
 
-  A('Friday','dolores','DJ Erinyes',12,30,1,15,'f1'),
-  A('Friday','dolores','DJ Dolomedes',1,15,2,0,'f2'),
-  A('Friday','dolores','Pink Stiletto',2,0,2,30,'f3'),
-  A('Friday','dolores','DJ Starr Noir',2,30,3,20,'f4'),
-  A('Friday','dolores','Hot Goth Freak Show',3,20,3,50,'f5'),
-  A('Friday','dolores','Soltera',3,50,4,35,'f6'),
-  A('Friday','dolores','DJ Hopeless & Hot Goth Pole Show',4,35,5,20,'f7'),
-  A('Friday','dolores','Ms. Boan',5,20,6,5,'f8'),
-  A('Friday','dolores','Hot Goth Freak Show',6,5,6,35,'f9'),
-  A('Friday','dolores','Light Asylum',6,45,7,30,'f10'),
-  A('Friday','dolores','Romy (DJ Set)',7,30,8,30,'f11'),
+  A('Friday','dolores','DJ Erinyes',12,30,1,15,'f1','Electronic'),
+  A('Friday','dolores','DJ Dolomedes',1,15,2,0,'f2','Electronic'),
+  A('Friday','dolores','Pink Stiletto',2,0,2,30,'f3','Electronic'),
+  A('Friday','dolores','DJ Starr Noir',2,30,3,20,'f4','Electronic'),
+  A('Friday','dolores','Hot Goth Freak Show',3,20,3,50,'f5','Electronic'),
+  A('Friday','dolores','Soltera',3,50,4,35,'f6','Electronic'),
+  A('Friday','dolores','DJ Hopeless & Hot Goth Pole Show',4,35,5,20,'f7','Electronic'),
+  A('Friday','dolores','Ms. Boan',5,20,6,5,'f8','Electronic'),
+  A('Friday','dolores','Hot Goth Freak Show',6,5,6,35,'f9','Electronic'),
+  A('Friday','dolores','Light Asylum',6,45,7,30,'f10','Electronic'),
+  A('Friday','dolores','Romy (DJ Set)',7,30,8,30,'f11','Electronic'),
 
-  A('Friday','duboce','Nezza',2,5,2,35,'g1'),
-  A('Friday','duboce','Chezile',3,25,3,55,'g2'),
-  A('Friday','duboce','Luke Alessi',4,45,5,15,'g3'),
-  A('Friday','duboce','Alleycvt',6,15,6,45,'g4'),
-  A('Friday','duboce','Tobiahs',7,55,8,40,'g5'),
+  A('Friday','duboce','Nezza',2,5,2,35,'g1','Pop'),
+  A('Friday','duboce','Chezile',3,25,3,55,'g2','Pop'),
+  A('Friday','duboce','Luke Alessi',4,45,5,15,'g3','Electronic'),
+  A('Friday','duboce','Alleycvt',6,15,6,45,'g4','Electronic'),
+  A('Friday','duboce','Tobiahs',7,55,8,40,'g5','Electronic'),
 
-  A('Friday','cocktail','Bingo Loco',12,30,1,15,'h1'),
-  A('Friday','cocktail','Bingo Loco',1,40,2,25,'h2'),
-  A('Friday','cocktail','Bingo Loco',2,50,3,35,'h3'),
-  A('Friday','cocktail','Open Mic — Rainbow Girls',4,5,4,50,'h4'),
-  A('Friday','cocktail','Bootie Mashup: Diva Pop w/ DJ Tyme',5,5,6,5,'h5'),
-  A('Friday','cocktail','The Emo Night Tour',6,20,7,20,'h6'),
+  A('Friday','cocktail','Bingo Loco',12,30,1,15,'h1','Electronic'),
+  A('Friday','cocktail','Bingo Loco',1,40,2,25,'h2','Electronic'),
+  A('Friday','cocktail','Bingo Loco',2,50,3,35,'h3','Electronic'),
+  A('Friday','cocktail','Open Mic — Rainbow Girls',4,5,4,50,'h4','Folk/Country'),
+  A('Friday','cocktail','Bootie Mashup: Diva Pop w/ DJ Tyme',5,5,6,5,'h5','Electronic'),
+  A('Friday','cocktail','The Emo Night Tour',6,20,7,20,'h6','Electronic'),
 ],
 Saturday: [
-  A('Saturday','lands-end','Bandalos Chinos',12,10,12,55,'a1'),
-  A('Saturday','lands-end','Haute & Freddy',1,25,2,10,'a2'),
-  A('Saturday','lands-end','Audrey Hobert',2,40,3,30,'a3'),
-  A('Saturday','lands-end','Lucy Dacus',4,0,4,50,'a4'),
-  A('Saturday','lands-end','Ethel Cain',5,20,6,20,'a5'),
-  A('Saturday','lands-end','DJO',6,50,7,50,'a6'),
-  A('Saturday','lands-end','The Strokes',8,35,9,55,'a7'),
+  A('Saturday','lands-end','Bandalos Chinos',12,10,12,55,'a1','Rock'),
+  A('Saturday','lands-end','Haute & Freddy',1,25,2,10,'a2','Pop'),
+  A('Saturday','lands-end','Audrey Hobert',2,40,3,30,'a3','Pop'),
+  A('Saturday','lands-end','Lucy Dacus',4,0,4,50,'a4','Rock'),
+  A('Saturday','lands-end','Ethel Cain',5,20,6,20,'a5','Folk/Country'),
+  A('Saturday','lands-end','DJO',6,50,7,50,'a6','Rock'),
+  A('Saturday','lands-end','The Strokes',8,35,9,55,'a7','Rock'),
 
-  A('Saturday','twin-peaks','Red Leather',12,30,1,10,'b1'),
-  A('Saturday','twin-peaks','After',1,55,2,35,'b2'),
-  A('Saturday','twin-peaks','Łaszewo',3,10,4,0,'b3'),
-  A('Saturday','twin-peaks','Malcolm Todd',4,45,5,45,'b4'),
-  A('Saturday','twin-peaks','Dijon',6,30,7,20,'b5'),
-  A('Saturday','twin-peaks','The XX',8,10,9,25,'b6'),
+  A('Saturday','twin-peaks','Red Leather',12,30,1,10,'b1','Rock'),
+  A('Saturday','twin-peaks','After',1,55,2,35,'b2','Pop'),
+  A('Saturday','twin-peaks','Łaszewo',3,10,4,0,'b3','Pop'),
+  A('Saturday','twin-peaks','Malcolm Todd',4,45,5,45,'b4','Pop'),
+  A('Saturday','twin-peaks','Dijon',6,30,7,20,'b5','R&B'),
+  A('Saturday','twin-peaks','The XX',8,10,9,25,'b6','Electronic'),
 
-  A('Saturday','sutro','Rio Kosta',12,35,1,20,'c1'),
-  A('Saturday','sutro','Wunderhorse',1,50,2,35,'c2'),
-  A('Saturday','sutro','Sienna Spiro',3,5,3,50,'c3'),
-  A('Saturday','sutro','Yard Act',4,20,5,5,'c4'),
-  A('Saturday','sutro','Snow Strippers',5,35,6,20,'c5'),
-  A('Saturday','sutro',"It's Murph",6,50,8,0,'c6'),
-  A('Saturday','sutro','PinkPantheress',8,45,9,45,'c7'),
+  A('Saturday','sutro','Rio Kosta',12,35,1,20,'c1','Electronic'),
+  A('Saturday','sutro','Wunderhorse',1,50,2,35,'c2','Rock'),
+  A('Saturday','sutro','Sienna Spiro',3,5,3,50,'c3','R&B'),
+  A('Saturday','sutro','Yard Act',4,20,5,5,'c4','Rock'),
+  A('Saturday','sutro','Snow Strippers',5,35,6,20,'c5','Electronic'),
+  A('Saturday','sutro',"It's Murph",6,50,8,0,'c6','Rock'),
+  A('Saturday','sutro','PinkPantheress',8,45,9,45,'c7','Pop'),
 
-  A('Saturday','panhandle','Ryman',12,0,12,30,'d1'),
-  A('Saturday','panhandle','Racing Mount Pleasant',1,10,1,50,'d2'),
-  A('Saturday','panhandle','Ally Evenson',2,35,3,5,'d3'),
-  A('Saturday','panhandle','Automatic',4,0,4,40,'d4'),
-  A('Saturday','panhandle','Silvana Estrada',5,45,6,25,'d5'),
-  A('Saturday','panhandle','DJ Trixie Mattel',7,20,8,5,'d6'),
+  A('Saturday','panhandle','Ryman',12,0,12,30,'d1','Folk/Country'),
+  A('Saturday','panhandle','Racing Mount Pleasant',1,10,1,50,'d2','Folk/Country'),
+  A('Saturday','panhandle','Ally Evenson',2,35,3,5,'d3','Pop'),
+  A('Saturday','panhandle','Automatic',4,0,4,40,'d4','Rock'),
+  A('Saturday','panhandle','Silvana Estrada',5,45,6,25,'d5','Folk/Country'),
+  A('Saturday','panhandle','DJ Trixie Mattel',7,20,8,5,'d6','Electronic'),
 
-  A('Saturday','soma','Bad Juuju',12,35,1,55,'e1'),
-  A('Saturday','soma','I-800 Girls',1,55,3,25,'e2'),
-  A('Saturday','soma','Camoufly',3,25,4,55,'e3'),
-  A('Saturday','soma','Sultan + Shepard',4,55,6,25,'e4'),
-  A('Saturday','soma','Ben Böhmer',6,40,8,10,'e5'),
-  A('Saturday','soma','Lane 8',8,25,9,55,'e6'),
+  A('Saturday','soma','Bad Juuju',12,35,1,55,'e1','Electronic'),
+  A('Saturday','soma','I-800 Girls',1,55,3,25,'e2','Electronic'),
+  A('Saturday','soma','Camoufly',3,25,4,55,'e3','Electronic'),
+  A('Saturday','soma','Sultan + Shepard',4,55,6,25,'e4','Electronic'),
+  A('Saturday','soma','Ben Böhmer',6,40,8,10,'e5','Electronic'),
+  A('Saturday','soma','Lane 8',8,25,9,55,'e6','Electronic'),
 
-  A('Saturday','dolores','Oasis DJ Set: Beverly Chills',12,30,1,15,'f1'),
-  A('Saturday','dolores',"Out Tonight: Musical Singalong feat. D'Arcy Drollinger",1,15,2,15,'f2'),
-  A('Saturday','dolores','Reparations w/ Nicki Jizz feat. Kori King',3,15,4,45,'f3'),
-  A('Saturday','dolores','Oasis DJ Set: DJ Ion the Prize',4,45,5,45,'f4'),
-  A('Saturday','dolores','Princess w/ Tito Soto feat. Lydia B Kollins',5,45,7,15,'f5'),
-  A('Saturday','dolores','Princess DJ Set: DJ Vrok',7,15,8,30,'f6'),
+  A('Saturday','dolores','Oasis DJ Set: Beverly Chills',12,30,1,15,'f1','Electronic'),
+  A('Saturday','dolores',"Out Tonight: Musical Singalong feat. D'Arcy Drollinger",1,15,2,15,'f2','Electronic'),
+  A('Saturday','dolores','Reparations w/ Nicki Jizz feat. Kori King',3,15,4,45,'f3','Electronic'),
+  A('Saturday','dolores','Oasis DJ Set: DJ Ion the Prize',4,45,5,45,'f4','Electronic'),
+  A('Saturday','dolores','Princess w/ Tito Soto feat. Lydia B Kollins',5,45,7,15,'f5','Electronic'),
+  A('Saturday','dolores','Princess DJ Set: DJ Vrok',7,15,8,30,'f6','Electronic'),
 
-  A('Saturday','duboce','Surprise Guest',12,15,1,45,'g1'),
-  A('Saturday','duboce','Bandalos Chinos',2,10,2,40,'g2'),
-  A('Saturday','duboce','Racing Mount Pleasant',3,30,4,0,'g3'),
-  A('Saturday','duboce','Rio Kosta DJ Set',4,50,5,20,'g4'),
-  A('Saturday','duboce','Łaszewo',6,20,6,50,'g5'),
-  A('Saturday','duboce','Bad Juuju',7,50,8,35,'g6'),
+  A('Saturday','duboce','Surprise Guest',12,15,1,45,'g1','Pop'),
+  A('Saturday','duboce','Bandalos Chinos',2,10,2,40,'g2','Rock'),
+  A('Saturday','duboce','Racing Mount Pleasant',3,30,4,0,'g3','Folk/Country'),
+  A('Saturday','duboce','Rio Kosta DJ Set',4,50,5,20,'g4','Electronic'),
+  A('Saturday','duboce','Łaszewo',6,20,6,50,'g5','Pop'),
+  A('Saturday','duboce','Bad Juuju',7,50,8,35,'g6','Electronic'),
 
-  A('Saturday','cocktail','Bingo Loco',12,30,1,15,'h1'),
-  A('Saturday','cocktail','Bingo Loco',1,40,2,25,'h2'),
-  A('Saturday','cocktail','Bingo Loco',2,50,3,35,'h3'),
-  A('Saturday','cocktail','Open Mic — Rainbow Girls',4,5,4,50,'h4'),
-  A('Saturday','cocktail','Bootie Mashup: Hip Hop Fuego w/ DJ Airsun',5,5,6,5,'h5'),
-  A('Saturday','cocktail','Electric Feels',6,20,7,20,'h6'),
+  A('Saturday','cocktail','Bingo Loco',12,30,1,15,'h1','Electronic'),
+  A('Saturday','cocktail','Bingo Loco',1,40,2,25,'h2','Electronic'),
+  A('Saturday','cocktail','Bingo Loco',2,50,3,35,'h3','Electronic'),
+  A('Saturday','cocktail','Open Mic — Rainbow Girls',4,5,4,50,'h4','Folk/Country'),
+  A('Saturday','cocktail','Bootie Mashup: Hip Hop Fuego w/ DJ Airsun',5,5,6,5,'h5','Electronic'),
+  A('Saturday','cocktail','Electric Feels',6,20,7,20,'h6','Electronic'),
 ],
 Sunday: [
-  A('Sunday','lands-end',"San Francisco Gay Men's Chorus",12,0,12,40,'a1'),
-  A('Sunday','lands-end','Sports',1,10,1,55,'a2'),
-  A('Sunday','lands-end','Balu Brigada',2,25,3,15,'a3'),
-  A('Sunday','lands-end','Jade',3,45,4,45,'a4'),
-  A('Sunday','lands-end','Disco Lines',5,15,6,15,'a5'),
-  A('Sunday','lands-end','Empire of the Sun',6,45,7,45,'a6'),
-  A('Sunday','lands-end','RÜFÜS DU SOL',8,25,9,55,'a7'),
+  A('Sunday','lands-end',"San Francisco Gay Men's Chorus",12,0,12,40,'a1','Pop'),
+  A('Sunday','lands-end','Sports',1,10,1,55,'a2','Pop'),
+  A('Sunday','lands-end','Balu Brigada',2,25,3,15,'a3','Pop'),
+  A('Sunday','lands-end','Jade',3,45,4,45,'a4','Pop'),
+  A('Sunday','lands-end','Disco Lines',5,15,6,15,'a5','Electronic'),
+  A('Sunday','lands-end','Empire of the Sun',6,45,7,45,'a6','Electronic'),
+  A('Sunday','lands-end','RÜFÜS DU SOL',8,25,9,55,'a7','Electronic'),
 
-  A('Sunday','twin-peaks','Magnus Ferrell',12,45,1,25,'b1'),
-  A('Sunday','twin-peaks','Sosocamo',2,10,2,55,'b2'),
-  A('Sunday','twin-peaks','Destin Conrad',3,40,4,30,'b3'),
-  A('Sunday','twin-peaks','KWN',5,15,6,5,'b4'),
-  A('Sunday','twin-peaks','Mariah the Scientist',6,50,7,50,'b5'),
-  A('Sunday','twin-peaks','Baby Keem',8,40,9,55,'b6'),
+  A('Sunday','twin-peaks','Magnus Ferrell',12,45,1,25,'b1','Pop'),
+  A('Sunday','twin-peaks','Sosocamo',2,10,2,55,'b2','Rap'),
+  A('Sunday','twin-peaks','Destin Conrad',3,40,4,30,'b3','R&B'),
+  A('Sunday','twin-peaks','KWN',5,15,6,5,'b4','Pop'),
+  A('Sunday','twin-peaks','Mariah the Scientist',6,50,7,50,'b5','R&B'),
+  A('Sunday','twin-peaks','Baby Keem',8,40,9,55,'b6','Rap'),
 
-  A('Sunday','sutro','Death Cab for Cutie',12,40,1,30,'c1'),
-  A('Sunday','sutro','Momma',3,0,3,45,'c2'),
-  A('Sunday','sutro','Kingfishr',4,15,5,5,'c3'),
-  A('Sunday','sutro','The Temper Trap',5,35,6,25,'c4'),
-  A('Sunday','sutro','Not for Radio',7,5,7,55,'c5'),
-  A('Sunday','sutro','Death Cab for Cutie',8,25,9,40,'c6'),
+  A('Sunday','sutro','Death Cab for Cutie',12,40,1,30,'c1','Rock'),
+  A('Sunday','sutro','Momma',3,0,3,45,'c2','Rock'),
+  A('Sunday','sutro','Kingfishr',4,15,5,5,'c3','Folk/Country'),
+  A('Sunday','sutro','The Temper Trap',5,35,6,25,'c4','Rock'),
+  A('Sunday','sutro','Not for Radio',7,5,7,55,'c5','Rock'),
+  A('Sunday','sutro','Death Cab for Cutie',8,25,9,40,'c6','Rock'),
 
-  A('Sunday','panhandle','Cruz Beckham',12,0,12,40,'d1'),
-  A('Sunday','panhandle','Day We Ran',1,25,2,5,'d2'),
-  A('Sunday','panhandle','Amble',2,55,3,35,'d3'),
-  A('Sunday','panhandle','Night Tapes',4,30,5,10,'d4'),
-  A('Sunday','panhandle','Infinity Song',6,5,6,45,'d5'),
-  A('Sunday','panhandle','Frost Children',7,50,8,35,'d6'),
+  A('Sunday','panhandle','Cruz Beckham',12,0,12,40,'d1','Pop'),
+  A('Sunday','panhandle','Day We Ran',1,25,2,5,'d2','Rock'),
+  A('Sunday','panhandle','Amble',2,55,3,35,'d3','Folk/Country'),
+  A('Sunday','panhandle','Night Tapes',4,30,5,10,'d4','Electronic'),
+  A('Sunday','panhandle','Infinity Song',6,5,6,45,'d5','R&B'),
+  A('Sunday','panhandle','Frost Children',7,50,8,35,'d6','Electronic'),
 
-  A('Sunday','soma','Etari',12,5,1,35,'e1'),
-  A('Sunday','soma','X Club.',1,35,3,10,'e2'),
-  A('Sunday','soma','Carlita',3,10,4,45,'e3'),
-  A('Sunday','soma','Boys Noize',4,45,6,20,'e4'),
-  A('Sunday','soma','Miss Monique',6,20,7,55,'e5'),
-  A('Sunday','soma','Boris Brejcha',7,55,9,55,'e6'),
+  A('Sunday','soma','Etari',12,5,1,35,'e1','Electronic'),
+  A('Sunday','soma','X Club.',1,35,3,10,'e2','Electronic'),
+  A('Sunday','soma','Carlita',3,10,4,45,'e3','Electronic'),
+  A('Sunday','soma','Boys Noize',4,45,6,20,'e4','Electronic'),
+  A('Sunday','soma','Miss Monique',6,20,7,55,'e5','Electronic'),
+  A('Sunday','soma','Boris Brejcha',7,55,9,55,'e6','Electronic'),
 
-  A('Sunday','dolores','Charles Hawthorne',12,45,2,25,'f1'),
-  A('Sunday','dolores',"Mark O'Brien",2,25,3,45,'f2'),
-  A('Sunday','dolores','Grace Towers & Friends',3,45,4,5,'f3'),
-  A('Sunday','dolores','Stanley Frank Sensation',4,5,5,5,'f4'),
-  A('Sunday','dolores','Beya',5,5,6,5,'f5'),
-  A('Sunday','dolores','Grace Towers & Friends',6,5,6,25,'f6'),
-  A('Sunday','dolores','Elaine & Robin',6,25,7,25,'f7'),
-  A('Sunday','dolores','DJ Minx',7,25,8,25,'f8'),
+  A('Sunday','dolores','Charles Hawthorne',12,45,2,25,'f1','Electronic'),
+  A('Sunday','dolores',"Mark O'Brien",2,25,3,45,'f2','Electronic'),
+  A('Sunday','dolores','Grace Towers & Friends',3,45,4,5,'f3','Electronic'),
+  A('Sunday','dolores','Stanley Frank Sensation',4,5,5,5,'f4','Electronic'),
+  A('Sunday','dolores','Beya',5,5,6,5,'f5','Electronic'),
+  A('Sunday','dolores','Grace Towers & Friends',6,5,6,25,'f6','Electronic'),
+  A('Sunday','dolores','Elaine & Robin',6,25,7,25,'f7','Electronic'),
+  A('Sunday','dolores','DJ Minx',7,25,8,25,'f8','Electronic'),
 
-  A('Sunday','duboce','Britton',2,5,2,35,'g1'),
-  A('Sunday','duboce','Day We Ran',3,25,3,55,'g2'),
-  A('Sunday','duboce','Frost Children DJ Set',4,45,5,30,'g3'),
-  A('Sunday','duboce','Marlon Funaki',6,15,6,45,'g4'),
-  A('Sunday','duboce','Surprise Guest',7,45,8,45,'g5'),
+  A('Sunday','duboce','Britton',2,5,2,35,'g1','Pop'),
+  A('Sunday','duboce','Day We Ran',3,25,3,55,'g2','Rock'),
+  A('Sunday','duboce','Frost Children DJ Set',4,45,5,30,'g3','Electronic'),
+  A('Sunday','duboce','Marlon Funaki',6,15,6,45,'g4','Rock'),
+  A('Sunday','duboce','Surprise Guest',7,45,8,45,'g5','Pop'),
 
-  A('Sunday','cocktail','Bingo Loco',12,30,1,15,'h1'),
-  A('Sunday','cocktail','Bingo Loco',1,40,2,25,'h2'),
-  A('Sunday','cocktail','Bingo Loco',2,50,3,35,'h3'),
-  A('Sunday','cocktail','Open Mic — Rainbow Girls',4,5,4,50,'h4'),
-  A('Sunday','cocktail','Aidan Corcoran',5,15,5,45,'h5'),
-  A('Sunday','cocktail','Help Me Lose My Mind: UK Garage & House w/ MPHD',6,0,7,0,'h6'),
+  A('Sunday','cocktail','Bingo Loco',12,30,1,15,'h1','Electronic'),
+  A('Sunday','cocktail','Bingo Loco',1,40,2,25,'h2','Electronic'),
+  A('Sunday','cocktail','Bingo Loco',2,50,3,35,'h3','Electronic'),
+  A('Sunday','cocktail','Open Mic — Rainbow Girls',4,5,4,50,'h4','Folk/Country'),
+  A('Sunday','cocktail','Aidan Corcoran',5,15,5,45,'h5','Pop'),
+  A('Sunday','cocktail','Help Me Lose My Mind: UK Garage & House w/ MPHD',6,0,7,0,'h6','Electronic'),
 ]
 };
 
@@ -574,10 +583,17 @@ function wantersFor(actId){
 }
 
 let highlightPersonId = null;
+let genreFilter = null;
 let peopleExpanded = false;
 function togglePeopleExpanded(){ peopleExpanded = !peopleExpanded; render(); }
 function toggleHighlight(id){
   highlightPersonId = (highlightPersonId === id) ? null : id;
+  genreFilter = null;
+  render();
+}
+function toggleGenreFilter(g){
+  genreFilter = (genreFilter === g) ? null : g;
+  highlightPersonId = null;
   render();
 }
 async function setPersonColor(id, color){
@@ -757,7 +773,7 @@ function goToSearchResult(day, actId){
 
 
 function setDay(day){ currentDay = day; render(); }
-function setFilter(mode){ filterMode = mode; highlightPersonId = null; render(); }
+function setFilter(mode){ filterMode = mode; highlightPersonId = null; genreFilter = null; render(); }
 
 function dayBounds(day){
   let min=Infinity,max=-Infinity;
@@ -870,6 +886,13 @@ function render(){
       <div class="filter-chip ${filterMode==='mine'?'on':''}" onclick="setFilter('mine')">My picks only</div>
       <div class="filter-chip ${filterMode==='popular'?'on':''}" onclick="setFilter('popular')">🔥 Popular (${HOT_THRESHOLD}+)</div>
     </div>
+    <div class="panel-label" style="margin-top:12px;">Genre</div>
+    <div class="filter-row">`;
+  GENRES.forEach(g=>{
+    const on = genreFilter===g.name;
+    html += `<div class="filter-chip genre-chip ${on?'on':''}" style="${on?`background:${g.color};border-color:${g.color};color:#fff;`:`border-color:${g.color};color:${g.color};`}" onclick="toggleGenreFilter('${g.name}')">${g.name}</div>`;
+  });
+  html += `</div>
   </div>`;
 
   // grid
@@ -903,6 +926,12 @@ function render(){
         const hlWanted = wanters.some(w=>w.id===hlPerson.id);
         if(!hlWanted) cls += ' dimmed';
         else extraStyle = `box-shadow:0 0 0 3px ${hlPerson.color}, 0 0 10px 1px ${hlPerson.color}99;`;
+      } else if(genreFilter){
+        if(act.genre !== genreFilter) cls += ' dimmed';
+        else{
+          const gc = (GENRES.find(g=>g.name===genreFilter)||{}).color || '#FFD23E';
+          extraStyle = `box-shadow:0 0 0 3px ${gc};`;
+        }
       } else {
         if(filterMode==='mine' && !iAmIn) cls += ' dimmed';
         if(filterMode==='popular' && wanters.length<HOT_THRESHOLD) cls += ' dimmed';
